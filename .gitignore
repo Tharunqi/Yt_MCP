@@ -22,3 +22,14 @@ node_modules/
 dist/
 build/
 coverage/
+
+# Test and coverage output
+.coverage
+htmlcov/
+coverage/
+
+# Python packaging
+*.egg-info/
+
+# Local Obsidian settings
+brain/.obsidian/
