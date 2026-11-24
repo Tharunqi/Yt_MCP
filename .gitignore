@@ -33,3 +33,9 @@ coverage/
 
 # Local Obsidian settings
 brain/.obsidian/
+# YouTube OAuth files
+/credentials/*
+!/credentials/.gitkeep
+client_secret*.json
+token.json
+youtube_token*.json

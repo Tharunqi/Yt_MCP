@@ -20,10 +20,12 @@ COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Create a non-root user
-RUN useradd --create-home appuser
+RUN useradd --create-home appuser \
+    && mkdir -p /home/appuser/.config/youtube-mcp \
+    && chown -R appuser:appuser /home/appuser/.config
 
 USER appuser
 
-EXPOSE 8000
+EXPOSE 8000 8080
 
 CMD ["python", "-m", "youtube_mcp.server"]
