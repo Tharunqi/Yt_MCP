@@ -14,5 +14,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install project and development tools
+        run: python -m pip install -e ".[dev]"
+
+      - name: Check code style
+        run: ruff check src tests
+
+      - name: Run unit tests
+        run: pytest -p no:cacheprovider tests
+
       - name: Check for whitespace errors
         run: git diff --check HEAD^ HEAD
