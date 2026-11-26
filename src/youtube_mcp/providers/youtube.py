@@ -1,8 +1,11 @@
+import json
 import re
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
+
+from googleapiclient.errors import HttpError
 
 _PAGE_SIZE = 50
 _MAX_LIKED_VIDEOS = 1000
@@ -19,6 +22,15 @@ class VideoDetails:
     channel_title: str | None
     category_id: str | None
     duration_seconds: int | None
+    title: str | None = None
+    language_code: str | None = None
+
+
+@dataclass(frozen=True)
+class SearchVideo:
+    video_id: str
+    title: str | None
+    channel_title: str | None
 
 
 @dataclass(frozen=True)
@@ -132,6 +144,74 @@ class YouTubeDataProvider:
                     )
         return playlist_items
 
+    def search_videos(
+        self, topic: str, language_code: str | None = None
+    ) -> list[SearchVideo]:
+        params: dict[str, object] = {
+            "part": "snippet",
+            "q": topic,
+            "type": "video",
+            "maxResults": _PAGE_SIZE,
+            "order": "relevance",
+        }
+        if language_code:
+            params["relevanceLanguage"] = language_code
+        response = self._client.search().list(**params).execute()
+        candidates: list[SearchVideo] = []
+        for item in response.get("items", []):
+            video_id = item.get("id", {}).get("videoId")
+            if isinstance(video_id, str) and video_id:
+                snippet = item.get("snippet", {})
+                candidates.append(
+                    SearchVideo(
+                        video_id=video_id,
+                        title=snippet.get("title"),
+                        channel_title=snippet.get("channelTitle"),
+                    )
+                )
+        return candidates
+
+    def get_my_channel_id(self) -> str | None:
+        response = (
+            self._client.channels()
+            .list(part="id", mine=True, maxResults=1)
+            .execute()
+        )
+        items = response.get("items", [])
+        return items[0].get("id") if items else None
+
+    def create_playlist(self, title: str, visibility: str) -> str:
+        response = (
+            self._client.playlists()
+            .insert(
+                part="snippet,status",
+                body={
+                    "snippet": {"title": title},
+                    "status": {"privacyStatus": visibility},
+                },
+            )
+            .execute()
+        )
+        playlist_id = response.get("id")
+        if not isinstance(playlist_id, str) or not playlist_id:
+            raise RuntimeError("YouTube did not return the new playlist ID.")
+        return playlist_id
+
+    def add_video_to_playlist(self, playlist_id: str, video_id: str) -> None:
+        (
+            self._client.playlistItems()
+            .insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "playlistId": playlist_id,
+                        "resourceId": {"kind": "youtube#video", "videoId": video_id},
+                    }
+                },
+            )
+            .execute()
+        )
+
     def get_videos(self, video_ids: list[str]) -> dict[str, VideoDetails]:
         videos: dict[str, VideoDetails] = {}
         for start in range(0, len(video_ids), _PAGE_SIZE):
@@ -156,6 +236,11 @@ class YouTubeDataProvider:
                     duration_seconds=_duration_seconds(
                         content_details.get("duration")
                     ),
+                    title=snippet.get("title"),
+                    language_code=(
+                        snippet.get("defaultLanguage")
+                        or snippet.get("defaultAudioLanguage")
+                    ),
                 )
         return videos
 
@@ -172,3 +257,13 @@ class YouTubeDataProvider:
             for item in response.get("items", [])
             if item.get("id") and item.get("snippet", {}).get("title")
         }
+
+
+def youtube_error_reason(error: HttpError) -> str | None:
+    """Return YouTube's machine-readable reason from an API error, if present."""
+    try:
+        payload = json.loads(error.content.decode("utf-8"))
+    except (AttributeError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    details = payload.get("error", {}).get("errors", [])
+    return details[0].get("reason") if details else None

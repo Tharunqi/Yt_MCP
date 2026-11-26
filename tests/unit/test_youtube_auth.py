@@ -9,6 +9,8 @@ class FakeCredentials:
     valid = True
     expired = False
     refresh_token = None
+    scopes = [youtube_auth.YOUTUBE_READ_ONLY_SCOPE]
+    granted_scopes = [youtube_auth.YOUTUBE_READ_ONLY_SCOPE]
 
     def to_json(self) -> str:
         return json.dumps({"token": "saved"})
@@ -52,6 +54,7 @@ def test_first_sign_in_saves_token_with_private_permissions(
         "bind_addr": "0.0.0.0",
         "port": 1234,
         "open_browser": False,
+        "include_granted_scopes": "true",
     }
     assert json.loads(token_file.read_text()) == {"token": "saved"}
     assert stat.S_IMODE(token_file.stat().st_mode) == 0o600
@@ -66,7 +69,7 @@ def test_saved_valid_token_skips_sign_in(
     monkeypatch.setattr(
         youtube_auth.Credentials,
         "from_authorized_user_file",
-        lambda path, scopes: credentials,
+        lambda path: credentials,
     )
 
     result = youtube_auth.load_youtube_credentials("unused.json", token_file)
@@ -85,7 +88,7 @@ def test_client_uses_the_only_downloaded_oauth_file(
     monkeypatch.setattr(
         youtube_auth,
         "load_youtube_credentials",
-        lambda secrets_path, token_path: credentials,
+        lambda secrets_path, token_path, scopes=None: credentials,
     )
     monkeypatch.setattr(
         youtube_auth,
@@ -102,3 +105,44 @@ def test_client_uses_the_only_downloaded_oauth_file(
         "v3",
         {"credentials": credentials, "cache_discovery": False},
     )
+
+
+def test_saved_read_only_token_requests_playlist_write_scope_incrementally(
+    monkeypatch, tmp_path: Path
+) -> None:
+    token_file = tmp_path / "token.json"
+    token_file.write_text("{}")
+    read_only = FakeCredentials()
+    monkeypatch.setattr(
+        youtube_auth.Credentials,
+        "from_authorized_user_file",
+        lambda path: read_only,
+    )
+    write_credentials = FakeCredentials()
+    write_credentials.granted_scopes = [
+        youtube_auth.YOUTUBE_READ_ONLY_SCOPE,
+        youtube_auth.YOUTUBE_PLAYLIST_WRITE_SCOPE,
+    ]
+    flow = FakeFlow(write_credentials)
+    requested = []
+
+    def create_flow(path: str, scopes: list[str]) -> FakeFlow:
+        requested.extend(scopes)
+        return flow
+
+    monkeypatch.setattr(
+        youtube_auth.InstalledAppFlow, "from_client_secrets_file", create_flow
+    )
+
+    result = youtube_auth.load_youtube_credentials(
+        "client_secret.json",
+        token_file,
+        [youtube_auth.YOUTUBE_READ_ONLY_SCOPE, youtube_auth.YOUTUBE_PLAYLIST_WRITE_SCOPE],
+    )
+
+    assert result is write_credentials
+    assert requested == [
+        youtube_auth.YOUTUBE_READ_ONLY_SCOPE,
+        youtube_auth.YOUTUBE_PLAYLIST_WRITE_SCOPE,
+    ]
+    assert flow.run_options["include_granted_scopes"] == "true"
