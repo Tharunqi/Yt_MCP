@@ -1,41 +1,44 @@
 # Second Brain
 
-Entry point for the repository knowledge base. Notes follow PARA: action-oriented projects, ongoing areas, reference resources, unsorted inbox, and inactive archive.
+This is the entry point for repository knowledge. Notes use PARA: active work in projects, ongoing responsibility in areas, reusable material in resources, unsorted material in inbox, and inactive notes in archive.
 
 ## Projects
 
-- [[youtube-mcp-discovery]] — FR-1 similar-video discovery and remaining FR-2 work, tracked against [[youtube-mcp-requirements#FR-1|FR-1]] and [[youtube-mcp-requirements#FR-2|FR-2]].
+- [[youtube-mcp-discovery]] — Sid's FR-1 similar-video implementation and remaining FR-2 work.
+- [[youtube-mcp]] — shared project status and work across assigned requirements.
+- [[ai-session-2026-11-26-fr4-fr5-live-check]] — Tharun's FR-4 and FR-5 live-check record.
 
 ## Areas
 
-- [[team-collaboration]] — shared branch, review, and contribution practices.
+- [[team-collaboration]] — branch, review, contribution, and authorship practices.
 
 ## Resources
 
-- [[youtube-mcp-requirements]] — distilled product and architecture requirements from the team guide and SRS.
-- [[second-brain-conventions]] — PARA structure, workflow, review, PR, and authorship conventions.
+- [[youtube-mcp-requirements]] — distilled product and architecture requirements from the SRS and team guide.
+- [[second-brain-conventions]] — PARA, review, PR, and authorship conventions.
+- [[second-brain-workflow]] — shared workflow guidance maintained by the team.
 
 ## Contributors
 
-- [[Sid]] — project notes and implementation log.
-- [[Tharun]] — contributor note (to be authored by Tharun).
-- [[Viraj]] — contributor note (to be authored by Viraj).
+- [[Sid]] — FR-1 implementation notes and work history.
+- [[Tharun]] — Tharun's assigned work and updates.
+- [[Viraj]] — contributor note to be authored by Viraj.
 - [[Team]] — current team roster.
 
-## Workflow
+## Workflow skills
 
 - [[skills/brain-ingest/SKILL|brain-ingest]] — add source material and summaries.
 - [[skills/brain-refine/SKILL|brain-refine]] — organize notes, merge duplicates, and repair links.
-- [[skills/brain-query/SKILL|brain-query]] — answer questions and draft project documents from distilled notes.
+- [[skills/brain-query/SKILL|brain-query]] — answer questions and draft documents from distilled notes.
 
-## Run log
+## Work log
 
-- [[log]] — one entry per commit, with a review of what worked, what did not, and what changes next.
+- [[log]] — commit-level entries with stage reviews.
 
 ## PARA folders
 
 - `brain/inbox/` — unsorted notes awaiting refinement.
-- `brain/projects/` — active work with a concrete outcome.
+- `brain/projects/` — active work with concrete outcomes.
 - `brain/areas/` — ongoing responsibilities.
-- `brain/resources/` — distilled reference material.
-- `brain/archive/` — inactive or completed material retained for reference.
+- `brain/resources/` — reference material.
+- `brain/archive/` — inactive material retained for reference.
