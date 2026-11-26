@@ -7,7 +7,7 @@ Significant work runs and reviews are recorded here. Keep notes short and never 
 - Goal: check FR-4 and FR-5 with the signed-in YouTube account.
 - Worked: FR-4 read-only analysis returned one video. FR-5 preview returned a plan with 21 videos totaling 12m 12s.
 - Did not: rebuilding the normal Docker image timed out during a dependency download. No playlist was created. See [[ai-session-2026-11-26-fr4-fr5-live-check]] for session details.
-- Next: retry the build later and continue live testing when Tharun is ready. See [[projects/youtube-mcp]] and [[Tharun]].
+- Next: retry the build later and continue live testing when Tharun is ready. See [[brain/tharun/projects/youtube-mcp]] and [[brain/tharun/Tharun]].
 
 ## 2026-11-26 — Second Brain review
 
