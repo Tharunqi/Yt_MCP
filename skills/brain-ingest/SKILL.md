@@ -1,18 +1,13 @@
 ---
 name: brain-ingest
-description: Add new source material and concise, traceable summaries to the repository Second Brain.
+description: Add new project information to the Second Brain as short, linked notes.
 ---
 
-# brain-ingest
+# Brain ingest
 
-Use this workflow when new project source material, decisions, test results, or user-provided requirements should be captured.
-
-1. Start at [[brain/index]] and follow the shared placement rules in [[second-brain-workflow]].
-2. Distinguish source-document requirements from the user's current request. Extract durable facts, decisions, constraints, and open questions; preserve requirement IDs.
-3. Place unsorted material in `brain/inbox/`; put reviewed reusable summaries in `brain/resources/`; put active outcomes in `brain/projects/`.
-4. Write summaries in your own words. Add Obsidian wikilinks, source names, dates, and issue/PR links when known. Do not guess missing facts or IDs.
-5. Keep credentials, tokens, API keys, and private user data out of notes.
-6. When recording a commit in `brain/log.md`, include a short review of what worked, what did not, and what should change. Consolidate intermediate checkpoints into the commit's entry.
-7. Follow [[second-brain-conventions]] and the distilled product constraints in [[youtube-mcp-requirements]].
-
-Brain changes go through a reviewed PR. Do not create or push a commit unless the user explicitly asks.
+1. Read [[second-brain-workflow]] and check [[index]] for the right place.
+2. Add unsorted information to `brain/inbox/`; put useful, organized notes in the right PARA folder.
+3. Write a short summary in your own words. Keep source, date, requirement IDs, and issue/PR links when known.
+4. Link related notes with `[[wikilinks]]`. Do not guess missing facts or IDs.
+5. Add significant runs to [[log]] and update [[index]] if a new note should be easy to find.
+6. Never add credentials, tokens, or secrets.
