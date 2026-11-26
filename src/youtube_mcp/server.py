@@ -18,6 +18,8 @@ from youtube_mcp.common.config import settings
 from youtube_mcp.database.engine import create_database_engine
 from youtube_mcp.discovery.similar_videos import (
     SimilarVideoProvider,
+)
+from youtube_mcp.discovery.similar_videos import (
     find_similar_videos as discover_similar_videos,
 )
 from youtube_mcp.engagement.analysis import (
