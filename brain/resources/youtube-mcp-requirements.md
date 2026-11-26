@@ -19,6 +19,12 @@ Resolve a channel URL, handle, or ID; fetch public channel metadata and a bounde
 - Put unit tests in the matching `tests/unit/<feature>/` tree and coordinate changes to shared modules.
 - Store API keys in ignored local `.env`; never commit them or put them in notes/logs.
 
+## Quota model update — 2026-11-26
+
+The SRS describes quota as one daily-unit budget, but the current official [YouTube Data API quota calculator](https://developers.google.com/youtube/data/determine_quota_cost?hl=en) places `search.list` in a separate Search Queries bucket: each call costs one unit in that bucket, with a default 100 calls per day. `videos.list` costs one unit in the standard bucket. FR-1 preflight estimates both standard units and search calls. The SQLAlchemy ledger in `src/youtube_mcp/quota/ledger.py` reserves both buckets atomically, tracks actual attempted calls, and settles each reservation. Defaults are configurable with `YOUTUBE_DEFAULT_QUOTA_DAILY_LIMIT` and `YOUTUBE_SEARCH_QUOTA_DAILY_LIMIT`; the ledger uses a Pacific-time quota date. PostgreSQL row locking is intended to coordinate concurrent app instances.
+
+Migrations are deferred by the current project decision. `Base.metadata.create_all` creates missing tables at startup but is not a schema-upgrade mechanism. Automated tests currently exercise the ledger with SQLite; PostgreSQL concurrency has not yet been verified.
+
 ## Current stage reference
 
-The current provider foundation is tracked in [[youtube-mcp-discovery]]. Open decisions must be resolved and recorded before the ranking stages. See also [[second-brain-conventions]] for PARA and review rules.
+FR-1 implementation status, bounds, and its current scoring choices are tracked in [[youtube-mcp-discovery]]. FR-2 design decisions remain open. See also [[second-brain-conventions]] for PARA and review rules.

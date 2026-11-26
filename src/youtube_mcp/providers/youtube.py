@@ -9,6 +9,7 @@ from googleapiclient.errors import HttpError
 from youtube_mcp.common.config import Settings, settings
 from youtube_mcp.common.errors import ResourceNotFoundError, YouTubeAPIError
 from youtube_mcp.common.identifiers import parse_channel_identifier, parse_video_id
+from youtube_mcp.quota.usage import QuotaBucket, record_api_call
 
 
 @dataclass(frozen=True)
@@ -52,7 +53,8 @@ class YouTubeProvider:
         return self._client
 
     @staticmethod
-    def _execute(request: Any) -> dict[str, Any]:
+    def _execute(request: Any, *, quota_bucket: QuotaBucket = "standard") -> dict[str, Any]:
+        record_api_call(quota_bucket)
         try:
             return request.execute()
         except HttpError as exc:
@@ -61,7 +63,8 @@ class YouTubeProvider:
     def get_video(self, video_id_or_url: str) -> VideoMetadata:
         video_id = parse_video_id(video_id_or_url)
         response = self._execute(
-            self._api().videos().list(part="snippet,contentDetails", id=video_id)
+            self._api().videos().list(part="snippet,contentDetails", id=video_id),
+            quota_bucket="standard",
         )
         items = response.get("items", [])
         if not items:
@@ -71,7 +74,8 @@ class YouTubeProvider:
     def search_videos(self, query: str, *, max_results: int | None = None) -> list[VideoMetadata]:
         limit = self._bounded_limit(max_results, self._config.max_search_results)
         response = self._execute(
-            self._api().search().list(part="snippet", type="video", q=query, maxResults=limit)
+            self._api().search().list(part="snippet", type="video", q=query, maxResults=limit),
+            quota_bucket="search",
         )
         ids = [item.get("id", {}).get("videoId") for item in response.get("items", [])]
         return self._videos_by_ids([video_id for video_id in ids if video_id])
@@ -87,7 +91,7 @@ class YouTubeProvider:
             "username": "forUsername",
         }[kind]
         kwargs[parameter] = parsed_value
-        response = self._execute(self._api().channels().list(**kwargs))
+        response = self._execute(self._api().channels().list(**kwargs), quota_bucket="standard")
         items = response.get("items", [])
         if not items:
             raise ResourceNotFoundError("Channel was not found or is not publicly accessible.")
@@ -98,7 +102,8 @@ class YouTubeProvider:
     ) -> list[ChannelMetadata]:
         limit = self._bounded_limit(max_results, self._config.max_search_results)
         response = self._execute(
-            self._api().search().list(part="snippet", type="channel", q=query, maxResults=limit)
+            self._api().search().list(part="snippet", type="channel", q=query, maxResults=limit),
+            quota_bucket="search",
         )
         ids = [item.get("id", {}).get("channelId") for item in response.get("items", [])]
         return self._channels_by_ids([channel_id for channel_id in ids if channel_id])
@@ -114,7 +119,8 @@ class YouTubeProvider:
         response = self._execute(
             self._api()
             .playlistItems()
-            .list(part="contentDetails", playlistId=playlist_id, maxResults=limit)
+            .list(part="contentDetails", playlistId=playlist_id, maxResults=limit),
+            quota_bucket="standard",
         )
         ids = [item.get("contentDetails", {}).get("videoId") for item in response.get("items", [])]
         return self._videos_by_ids([video_id for video_id in ids if video_id])
@@ -128,7 +134,8 @@ class YouTubeProvider:
                 .list(
                     part="snippet,contentDetails",
                     id=",".join(ids[start : start + 50]),
-                )
+                ),
+                quota_bucket="standard",
             )
             results.extend(self._video(item) for item in response.get("items", []))
         return results
@@ -142,7 +149,8 @@ class YouTubeProvider:
                 .list(
                     part="snippet,contentDetails",
                     id=",".join(ids[start : start + 50]),
-                )
+                ),
+                quota_bucket="standard",
             )
             results.extend(self._channel(item) for item in response.get("items", []))
         return results

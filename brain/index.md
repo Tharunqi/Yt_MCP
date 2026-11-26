@@ -4,7 +4,7 @@ Entry point for the repository knowledge base. Notes follow PARA: action-oriente
 
 ## Projects
 
-- [[youtube-mcp-discovery]] — similar-video and similar-channel implementation, tracked against [[youtube-mcp-requirements#FR-1|FR-1]] and [[youtube-mcp-requirements#FR-2|FR-2]].
+- [[youtube-mcp-discovery]] — FR-1 similar-video discovery and remaining FR-2 work, tracked against [[youtube-mcp-requirements#FR-1|FR-1]] and [[youtube-mcp-requirements#FR-2|FR-2]].
 
 ## Areas
 
@@ -30,7 +30,7 @@ Entry point for the repository knowledge base. Notes follow PARA: action-oriente
 
 ## Run log
 
-- [[log]] — dated implementation records and stage reviews.
+- [[log]] — one entry per commit, with a review of what worked, what did not, and what changes next.
 
 ## PARA folders
 

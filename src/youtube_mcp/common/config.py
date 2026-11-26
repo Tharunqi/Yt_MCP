@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     api_key: SecretStr | None = None
     max_search_results: int = Field(default=25, ge=1, le=50)
     max_upload_sample: int = Field(default=20, ge=1, le=50)
+    default_quota_daily_limit: int = Field(default=10_000, ge=1)
+    search_quota_daily_limit: int = Field(default=100, ge=1)
 
 
 settings = Settings()

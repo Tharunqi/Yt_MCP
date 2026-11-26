@@ -11,6 +11,7 @@ Use this workflow to answer questions or draft documents such as SRS updates, AD
 2. Separate confirmed facts from assumptions, unresolved decisions, and user-reported outcomes. Keep requirement IDs visible.
 3. Link the answer or draft to its source notes with Obsidian wikilinks. For a requirement, link its stable ID heading (for example, [[brain/resources/youtube-mcp-requirements#FR-1|FR-1]]).
 4. Every ADR and every new skill must cite at least one distilled note, as required by SB-3. Prefer [[brain/resources/youtube-mcp-requirements]] for product constraints and [[brain/resources/second-brain-conventions]] for knowledge-work rules.
-5. If the query reveals stale or missing knowledge, route the update through [[skills/brain-ingest/SKILL|brain-ingest]] or [[skills/brain-refine/SKILL|brain-refine]], then record meaningful work in `brain/log.md`.
+5. If the query reveals stale or missing knowledge, route the update through [[skills/brain-ingest/SKILL|brain-ingest]] or [[skills/brain-refine/SKILL|brain-refine]], then reconcile `brain/log.md` with the commit history and any user-requested pending entry.
+6. When asked what has been committed, verify `git log` and distinguish commit history from uncommitted working-tree changes.
 
 Do not present an inference as a source fact. Do not include secrets or private user data in answers or drafts.
