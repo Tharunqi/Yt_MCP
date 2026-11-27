@@ -34,8 +34,18 @@ Requirements: FR-3, FR-6.
 - The result includes available title, channel, description, category name and ID, publication date, and formatted plus original ISO-8601 duration. Missing values remain explicit. The result states that it is metadata-based and does not summarize spoken content.
 - Added quota preflight for up to two standard API calls (video details and optional category-name lookup) and focused unit/integration test files. Updated the README, MCP tool reference, and traceability row.
 - **Verification:** Python syntax parsing and git diff --check passed. Pytest and Ruff could not run in this environment: the repository virtual environment contains Linux executables, WSL has no installed distribution, and the bundled Python has neither pytest nor Ruff.
-- **Next:** Run the focused tests in a working Python 3.12 environment, then continue with FR-3. The selected-playlist input path remains to be confirmed.
+- **Verification update:** The corrected implementation passed GitHub CI in PR [#8](https://github.com/Tharunqi/Yt_MCP/pull/8).
+- **Next:** Continue with FR-3. The selected-playlist input path remains to be confirmed.
+
+## Session 3: FR-3 ranking core
+
+- Added an ephemeral preference profile built from the request topic and current liked/saved video metadata. No inferred profile is persisted.
+- Added a deterministic score with topic similarity (45%), creator affinity (25%), freshness (20%), and prior-interest overlap (10%). Liked/saved IDs are excluded, explanations are included, and channel repetition is limited for diversity.
+- Added unit cases for profile inputs, ranking signals, exclusion, diversity, stable ties, and limit validation.
+- **Verification:** GitHub CI passed on commit `4780721` in PR [#8](https://github.com/Tharunqi/Yt_MCP/pull/8). Local test execution remains unavailable without Python.
+- **Stage review:** The ranking logic is isolated and deterministic. Account retrieval and the MCP tool remain; local execution of the test suite was unavailable. Continue by wiring those pieces through the existing OAuth, provider, and quota boundaries.
+- **Next:** Add bounded authorized account retrieval, quota preflight, candidate searches/channel samples, and the MCP tool; update docs alongside that integration.
 
 Related notes: [[brain/tharun/resources/second-brain-workflow]], [[docs/requirements/srs]], [[docs/traceability]].
 
-No issue or PR IDs were available during this review.
+PR: [#8](https://github.com/Tharunqi/Yt_MCP/pull/8). No GitHub issue ID has been created.

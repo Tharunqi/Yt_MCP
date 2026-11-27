@@ -17,5 +17,16 @@
 - Added focused unit and MCP integration test files. Updated the README, MCP tool reference, and requirement traceability.
 - **Worked:** The existing provider supplies the required fields through the official API, and the new tool follows the server's provider/quota pattern.
 - **Could not verify:** Pytest and Ruff could not run because this Windows session cannot execute the repository's Linux .venv; WSL has no distribution, and bundled Python lacks those packages. AST parsing and git diff --check passed.
-- **Next:** Run the FR-6 checks in a working Python 3.12 setup, then proceed to FR-3 and confirm how selected playlist IDs enter the request.
+- **Verification update:** PR [#8](https://github.com/Tharunqi/Yt_MCP/pull/8) passed GitHub CI after correcting the quota test reference and replacing an 11-character syntactically valid ID in the invalid-ID test.
+- **Next:** Continue FR-3 by confirming the selected-playlist input contract and integrating the request-time ranker with authorized account data.
 - Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[brain/tharun/resources/second-brain-workflow]].
+
+## 2026-11-27 - FR-3 ranking core
+
+- Confirmed `origin/main` had not advanced before starting the FR-3 work.
+- Added a request-scoped preference profile and deterministic ranking core in `src/youtube_mcp/recommendations/personalized.py`. It scores topic overlap, creator affinity, freshness, and liked/saved metadata overlap; excludes liked and selected-playlist video IDs; limits repeated creators; and gives short reasons.
+- Added focused unit cases in `tests/unit/recommendations/test_personalized.py` for profile construction, ranking signals, exclusions, diversity, stable ordering, and invalid bounds.
+- **Verification:** `git diff --check` passed. GitHub CI passed on commit `4780721` for PR [#8](https://github.com/Tharunqi/Yt_MCP/pull/8). Local Python tests were unavailable because Python is not installed in this Windows environment.
+- **Stage review:** The pure ranking layer is isolated and deterministic. Account retrieval and the MCP tool remain incomplete; local test execution was unavailable. Next session should wire those layers through the existing OAuth/provider and quota boundaries.
+- **Next:** Integrate account data and bounded candidate acquisition with the OAuth and quota patterns; wire the MCP tool and update shared docs.
+- Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs]], [[docs/traceability]].
