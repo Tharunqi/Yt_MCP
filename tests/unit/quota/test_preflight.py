@@ -3,6 +3,7 @@ import pytest
 from youtube_mcp.quota.preflight import (
     QuotaEstimate,
     estimate_engagement_quota,
+    estimate_playlist_analysis_quota,
     estimate_playlist_creation_quota,
     estimate_playlist_preview_quota,
 )
@@ -24,3 +25,7 @@ def test_playlist_creation_estimate_counts_each_write() -> None:
     assert estimate_playlist_creation_quota(50) == QuotaEstimate(2551, 0)
     with pytest.raises(ValueError, match="positive"):
         estimate_playlist_creation_quota(0)
+
+
+def test_playlist_analysis_estimate_covers_bounded_reads() -> None:
+    assert estimate_playlist_analysis_quota() == QuotaEstimate(41, 0)

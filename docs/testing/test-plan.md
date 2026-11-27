@@ -39,3 +39,11 @@ remain CI checks and have not yet completed in this local environment.
 See [local-check](../../skills/local-check/SKILL.md),
 [provider live check](../../skills/youtube-provider-live-check/SKILL.md), and
 [skill evaluation records](skill-evaluations.md).
+
+
+## FR-7 local result — 2026-11-28
+
+- Focused FR-7 and quota checks: 13 passed.
+- Full automated suite: 100 passed, 5 opt-in live checks skipped.
+- Ruff: passed. Repository docs and Brain validator: passed. `git diff --check`: passed.
+- Live FR-7 check: passed through the MCP server with read-only access. The quota ledger settled 3 standard units against a 41-unit reservation. The playlist result is not copied into project notes. Docker image build: passed; the standalone local `python -m build` command remains unavailable because `build` is not installed in the host environment. CI installs it from dev dependencies.

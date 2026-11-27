@@ -1,5 +1,13 @@
 # Brain log
 
+## 2026-11-28 — FR-7 implementation
+
+- Goal: implement Tharun’s assigned playlist/video analysis requirement.
+- Changed: added the `analyze_playlist` tool and bounded descriptive metadata summary. It preserves duplicate playlist positions, labels missing metadata, and does not save analytics. Added focused unit and quota tests. Updated shared FR-7 docs and [[brain/tharun/projects/fr7-playlist-analysis]].
+- Checks: focused FR-7 and quota tests passed (13); full suite passed (100) with 5 live checks skipped; Ruff, docs/Brain validation, and `git diff --check` passed. Package build was blocked because the local `build` module is missing; CI installs it from dev dependencies. The first live attempt found the old app image. Rebuilding from the current checkout exposed `analyze_playlist`; the read-only MCP check then passed. The result content is not saved in project notes.
+- Next: complete tomorrow’s final SRS/SDLC review of FR-4, FR-5, and FR-7. The YouTube API policy review remains open before release or storage.
+
+
 Significant work runs and reviews are recorded here. Keep notes short and never include secrets.
 
 ## 2026-11-28 — Main merge and FR-4/FR-5 review

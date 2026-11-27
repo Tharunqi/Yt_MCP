@@ -9,6 +9,12 @@ from mcp.server.fastmcp import FastMCP
 from oauthlib.oauth2 import OAuth2Error
 from sqlalchemy import Engine
 
+from youtube_mcp.analytics.playlist_analysis import (
+    analyze_playlist as build_playlist_analysis,
+)
+from youtube_mcp.analytics.playlist_analysis import (
+    validate_playlist_id,
+)
 from youtube_mcp.auth.youtube import (
     YOUTUBE_PLAYLIST_WRITE_SCOPE,
     YOUTUBE_READ_ONLY_SCOPE,
@@ -48,6 +54,7 @@ from youtube_mcp.quota.preflight import (
     QuotaPreflight,
     UnavailableQuotaPreflight,
     estimate_engagement_quota,
+    estimate_playlist_analysis_quota,
     estimate_playlist_creation_quota,
     estimate_playlist_preview_quota,
 )
@@ -242,6 +249,22 @@ def analyze_engagement(
     )
     return analyze_engagement_data(
         data, start, end, comparison_start, comparison_end
+    )
+
+
+@mcp.tool()
+def analyze_playlist(playlist_id: str) -> dict[str, Any]:
+    """Analyze playlist duration and item metadata without saving the results."""
+    validate_playlist_id(playlist_id)
+
+    def analyze() -> dict[str, Any]:
+        provider = YouTubeDataProvider(build_youtube_client())
+        return build_playlist_analysis(playlist_id, provider)
+
+    return _run_with_quota(
+        _feature_quota_preflight,
+        estimate_playlist_analysis_quota(),
+        analyze,
     )
 
 

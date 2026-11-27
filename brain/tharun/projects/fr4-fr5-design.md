@@ -202,4 +202,4 @@ erDiagram
   are present; the preview and confirmed write flow have been manually checked.
 - **Did not:** PostgreSQL concurrency and the full MCP feature matrix were not
   checked in this run.
-- **Change next:** review the quota wiring and its tests, then begin FR-7.
+- **Change next:** complete the final SRS/SDLC review of FR-4, FR-5, and FR-7; FR-7 implementation and live check are in [[fr7-playlist-analysis]].

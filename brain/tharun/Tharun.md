@@ -4,7 +4,7 @@
 
 - **FR-4:** Engagement analysis — complete and live-checked.
 - **FR-5:** Playlist suggestions and creation — implemented, unit-checked, previewed live, and manually created after confirmation.
-- **FR-7:** Playlist and video analysis — next.
+- **FR-7:** Playlist and video analysis — implemented, unit-checked, and live-checked; policy review remains.
 
 I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] for project status and [[brain/tharun/log]] for run records.
 
@@ -29,6 +29,15 @@ I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] f
 - No playlist is created until the user confirms the one-time preview. The preview expires after 15 minutes. Write access is requested after confirmation, and the app checks for a YouTube channel first.
 - The result lists videos added and any that failed. Unit checks passed, the live preview worked, and the user later reported successful playlist creation after confirmation.
 
+## FR-7 progress
+
+- `analyze_playlist` checks one playlist ID, then reads up to 1,000 items across 20 pages.
+- The result includes known total duration, five duration ranges, channel/category counts, and each playlist item’s metadata and link.
+- Repeated videos count as separate playlist items. Missing videos and durations are shown; the duration total uses known values only.
+- The result says it is descriptive metadata, does not measure viewing behavior, and is not saved. Quota is reserved before client setup and YouTube reads.
+- Unit tests cover counts, missing metadata, repeated videos, empty playlists, ID checks, quota rejection, and result output.
+- A read-only live check passed through MCP. The YouTube API policy review is still needed before release or storage.
+
 ## Second Brain
 
 - Start from [[brain/tharun/index]] and use the [[second-brain-workflow]] note.
@@ -49,5 +58,5 @@ I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] f
 
 - Review this Brain update and submit it through a PR, as required by SB-5.
 - Ask each team member to author their own Brain note.
-- Retry the Docker build when the network is available. FR-4 and FR-5 live checks are recorded.
-- Review the FR-4/FR-5 quota checks, then start FR-7.
+- FR-4 and FR-5 live checks are recorded.
+- Tomorrow: finish the SRS/SDLC review of FR-4, FR-5, and FR-7. The YouTube API policy review remains open before release or storage.

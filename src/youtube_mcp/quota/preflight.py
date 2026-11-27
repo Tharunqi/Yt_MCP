@@ -87,6 +87,11 @@ def estimate_engagement_quota(*, max_playlists: int = 5) -> QuotaEstimate:
     )
 
 
+def estimate_playlist_analysis_quota() -> QuotaEstimate:
+    """Reserve 20 playlist pages, 20 video batches, and one category lookup."""
+    return QuotaEstimate(default_bucket_units=41, search_query_calls=0)
+
+
 def estimate_playlist_preview_quota() -> QuotaEstimate:
     """Reserve one bounded search and one batched video-details request."""
     return QuotaEstimate(default_bucket_units=1, search_query_calls=1)

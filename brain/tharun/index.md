@@ -21,3 +21,4 @@ This is the entry point for the project notes.
 - [brain-ingest](../../skills/brain-ingest/SKILL.md)
 - [brain-refine](../../skills/brain-refine/SKILL.md)
 - [brain-query](../../skills/brain-query/SKILL.md)
+- [[brain/tharun/projects/fr7-playlist-analysis]] — FR-7 implementation and checks.

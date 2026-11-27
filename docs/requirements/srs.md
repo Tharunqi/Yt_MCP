@@ -147,6 +147,12 @@ expanding derived analytics.
 
 Detailed IDs: FR-7.1 retrieval; FR-7.2 total duration; FR-7.3 distribution;
 FR-7.4 channel/category counts; FR-7.5 item summaries; FR-7.6 descriptive label.
+The current implementation accepts one playlist ID, reads up to 1,000 items
+across 20 pages, and reports each playlist position. Repeated videos count as
+separate items. Missing videos or durations are marked, and totals cover known
+durations only. Results remain request-scoped and are not stored. A YouTube API
+policy review is still required before release or any storage/expansion of
+analytics.
 
 ### SK-1 — Video-to-playlist workflow (High)
 
