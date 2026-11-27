@@ -102,8 +102,9 @@ def test_summary_keeps_missing_metadata_explicit() -> None:
         )
     )
 
+    quota = FakeQuotaPreflight()
     result = summarize_video_metadata(
-        "abcdefghijk", provider, quota_preflight=FakeQuotaPreflight()
+        "abcdefghijk", provider, quota_preflight=quota
     )
 
     details = result["video"]
