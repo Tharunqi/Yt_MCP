@@ -2,7 +2,7 @@
 
 A Python MCP server for bounded YouTube video/channel discovery, account
 engagement analysis, and user-confirmed playlist creation. The current codebase
-implements FR-1, FR-2, FR-4, and the implemented portions of FR-5; see the [requirements](docs/requirements/srs.md)
+implements FR-1, FR-2, FR-4, FR-6, and the implemented portions of FR-5; see the [requirements](docs/requirements/srs.md)
 and [traceability matrix](docs/traceability.md) for the project-wide status.
 
 ## Local development

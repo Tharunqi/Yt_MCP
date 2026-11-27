@@ -81,6 +81,18 @@ class YouTubeProvider:
             raise ResourceNotFoundError("Video was not found or is not publicly accessible.")
         return self._video(items[0])
 
+    def get_video_category_name(self, category_id: str) -> str | None:
+        """Resolve a video category ID to its display name when available."""
+        response = self._execute(
+            self._api().videoCategories().list(part="snippet", id=category_id),
+            quota_bucket="standard",
+        )
+        for item in response.get("items", []):
+            title = item.get("snippet", {}).get("title")
+            if isinstance(title, str) and title.strip():
+                return title.strip()
+        return None
+
     def search_videos(self, query: str, *, max_results: int | None = None) -> list[VideoMetadata]:
         limit = self._bounded_limit(max_results, self._config.max_search_results)
         response = self._execute(

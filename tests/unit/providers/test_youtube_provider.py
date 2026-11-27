@@ -50,6 +50,10 @@ class FakeResource:
         self.resource_kind = "playlist_items"
         return self
 
+    def videoCategories(self) -> FakeResource:
+        self.resource_kind = "video_categories"
+        return self
+
     def list(self, **kwargs: Any) -> FakeRequest:
         if "id" in kwargs and kwargs.get("part") == "snippet,contentDetails":
             if self.resource_kind == "videos":
@@ -64,6 +68,8 @@ class FakeResource:
             kind = "search_channels"
         elif "playlistId" in kwargs:
             kind = "uploads"
+        elif self.resource_kind == "video_categories":
+            kind = "video_category"
         elif "forHandle" in kwargs or "forUsername" in kwargs:
             kind = "channel_lookup"
         elif kwargs.get("part") == "snippet,contentDetails":
@@ -144,6 +150,25 @@ def test_get_video_raises_for_unavailable_resource() -> None:
     provider = YouTubeProvider(client=FakeResource({}), config=settings())
     with pytest.raises(ResourceNotFoundError):
         provider.get_video("abcdefghijk")
+
+
+def test_get_video_category_name_resolves_category_title() -> None:
+    client = FakeResource(
+        {
+            "video_category": {
+                "items": [{"id": "27", "snippet": {"title": "Education"}}]
+            }
+        }
+    )
+    provider = YouTubeProvider(client=client, config=settings())
+
+    category_name = provider.get_video_category_name("27")
+
+    assert category_name == "Education"
+    assert client.requests["video_category"].kwargs == {
+        "part": "snippet",
+        "id": "27",
+    }
 
 
 def test_search_videos_caps_requested_candidate_count() -> None:

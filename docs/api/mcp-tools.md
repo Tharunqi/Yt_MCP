@@ -13,6 +13,7 @@ Endpoint in the local Compose setup: `http://localhost:8000/mcp`.
 | `health_check` | None | Returns a simple server-running message. |
 | `find_similar_videos` | `video_url_or_id: str`; `max_results: int = 10` (1–25) | Validates and resolves a public video, searches/ranks a bounded candidate pool, returns seed, queries, links, metadata and reasons. Requires an available quota preflight. Read-only YouTube API access. |
 | `find_similar_channels` | `channel_url_handle_or_id: str`; `max_results: int = 10` (1–10) | Resolves a public channel, samples up to five uploads per profile, searches up to three queries and ranks at most ten candidates. Returns links, scores and metadata-match reasons. Requires quota preflight. Read-only. |
+| `summarize_video_metadata` | `video_url_or_id: str` | Returns available video metadata (title, channel, description, category name and ID, publication date and duration) with an explicit metadata-only label. Does not summarize spoken content. Requires quota preflight. Read-only. |
 | `analyze_engagement` | `start_date`, `end_date`; optional `selected_playlist_ids`; optional paired `comparison_start_date`, `comparison_end_date` | Reads authorized account data and returns date-bounded engagement statistics. Requires OAuth. |
 | `preview_playlist` | `topic`, `total_duration_minutes`, `playlist_title`, `visibility`; optional `max_video_length_minutes`, `language` | Searches/fetches public metadata and returns a constrained preview. Does not write to the account. |
 | `create_playlist_from_preview` | `preview_id: str`; `confirmed_by_user: bool` | Creates a playlist and adds items only when explicit confirmation is true and valid write OAuth/channel access is available. Reports partial item failures. This tool changes the user's YouTube account. |
@@ -23,6 +24,6 @@ an untrusted model without an actual user confirmation is not valid consent.
 
 ## Planned MCP capabilities
 
-FR-3 recommendations, FR-6 metadata summary, and FR-7
-playlist/video analysis are not represented as available tools until implemented
-and tested. SK-1 requires those tools plus a complete FR-1/FR-5 flow.
+FR-3 recommendations and FR-7 playlist/video analysis are not represented as
+available tools until implemented and tested. SK-1 requires those tools plus a
+complete FR-1/FR-5 flow.

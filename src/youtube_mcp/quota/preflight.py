@@ -49,6 +49,11 @@ class UnavailableQuotaPreflight:
         )
 
 
+def estimate_metadata_summary_quota() -> QuotaEstimate:
+    """Reserve video details and the optional category-name lookup used by FR-6."""
+    return QuotaEstimate(default_bucket_units=2, search_query_calls=0)
+
+
 def estimate_similar_video_quota(*, max_queries: int = 3) -> QuotaEstimate:
     """Estimate the maximum quota for seed lookup and bounded video searches.
 
