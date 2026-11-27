@@ -22,6 +22,7 @@ host = [
     "openai",
 ]
 dev = [
+    "build",
     "pytest",
     "pytest-cov",
     "ruff",
@@ -34,6 +35,7 @@ where = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-v"
+markers = ["live: makes opt-in requests to the YouTube Data API"]
 
 [tool.ruff]
 line-length = 100

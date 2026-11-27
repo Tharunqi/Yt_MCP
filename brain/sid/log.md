@@ -37,3 +37,17 @@ Related: [[brain/sid/projects/youtube-mcp-discovery]], [[brain/sid/resources/you
 **Change for next stage:** Sync branch `sid` with `main`, preserve parallel FR-4/FR-5 work during conflict resolution, and submit the combined changes for review. Verify the ledger against PostgreSQL before relying on it in deployment. Keep the API key out of the container image and tracked files; inject it through the runtime environment when needed.
 
 Related: [[brain/sid/projects/youtube-mcp-discovery]], [[brain/sid/resources/youtube-mcp-requirements#FR-1|FR-1]], [[brain/sid/resources/youtube-mcp-requirements#Quota model|Quota model]], [[brain/tharun/projects/ai-session-2026-11-26-fr4-fr5-live-check]], [[brain/sid/resources/second-brain-conventions]].
+
+## FR-1 SDLC and FR-2 implementation stage
+
+**Goal:** Complete the SDLC workflow and validation artifacts for FR-1, then implement bounded FR-2 channel discovery.
+
+**Worked:** Added project requirements, architecture and data model, five ADRs, development plan, MCP reference, traceability, test plan, skill evaluations, defect log, release checklist, ten official-source research notes, local workflow skills, CI build/lint/test/secret/documentation checks, and loopback-only local service ports. Implemented FR-2 bounded channel search/profile sampling and ranking, quota preflight estimation, provider reuse for resolved channel metadata, and unit/provider/MCP integration coverage.
+
+**Did not work:** The initial live MCP test for `8vRhCUPB6Jk` returned no similar channels for TheCubicle. Testing a wider candidate cap confirmed the search itself yielded only the seed channel; the issue was long, branded queries and query ordering. After switching to cleaned channel-description, aggregated-tag, and concise-title queries, the same live test returned nine channels. An earlier sandboxed provider-test attempt was DNS-blocked. The local package build could not start because `build` is absent from the venv; Docker/PostgreSQL runtime behavior and concurrency remain unverified. No Issues/PRs or team review exist yet.
+
+**Review:** Worked: FR-1 acceptance and quota behavior are traceable through SRS, ADRs, code, tests, and Brain notes; FR-2 is bounded, covered by unit tests, and now returns live channel candidates for this seed. Focused query construction fixed the empty-result case without widening the candidate cap. Did not: an earlier AMD seed showed sponsor-description noise, some channel matches remain low-scoring, and local package build, Docker, PostgreSQL concurrency, policy review, and team review remain outstanding. Change next: assess more representative seeds and consider a minimum quality threshold before submission.
+
+**Final verification:** The prior full verification reported 68 automated tests passed and 5 opt-in live tests skipped; documentation validation passed for 6 skills and 26 Brain notes; Ruff, Compose configuration, and whitespace checks passed. The revised live MCP test also passed using a direct `https://www.youtube.com/@gameranxTV` seed for FR-2 and `safeSearch=none`. FR-2 generated `we make videos video games` and `gta things we do game`; results still included the kids' gaming channel Blippi Plays. This was not compared against `safeSearch=moderate` with identical code and queries, so the safety-filter effect remains unisolated. Package build, Docker service/PostgreSQL MCP smoke, and PostgreSQL concurrency remain unverified.
+
+AI session summary: [[brain/sid/projects/ai-session-2026-11-27-sdlc-deliverables]].

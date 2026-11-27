@@ -1,5 +1,6 @@
 
-## Team
+# Team
+
 - [[brain/sid/Sid|Sid]]
 - [[brain/tharun/Tharun|Tharun]]
 - [[brain/tharun/Viraj|Viraj]]

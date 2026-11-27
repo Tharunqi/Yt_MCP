@@ -63,3 +63,22 @@ def estimate_similar_video_quota(*, max_queries: int = 3) -> QuotaEstimate:
         default_bucket_units=1 + max_queries,
         search_query_calls=max_queries,
     )
+
+
+def estimate_similar_channels_quota(
+    *, candidate_limit: int = 10, max_queries: int = 3
+) -> QuotaEstimate:
+    """Reserve quota for seed/candidate upload samples and channel searches.
+
+    Each sampled channel may use one uploads-playlist request and one batched
+    videos.list request. Each channel search may also fetch matching channel
+    details once. The estimate assumes all bounded candidates have uploads.
+    """
+    if candidate_limit < 1:
+        raise ValueError("candidate_limit must be a positive integer")
+    if max_queries < 1:
+        raise ValueError("max_queries must be a positive integer")
+    return QuotaEstimate(
+        default_bucket_units=3 + max_queries + 2 * candidate_limit,
+        search_query_calls=max_queries,
+    )

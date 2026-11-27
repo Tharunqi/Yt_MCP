@@ -16,6 +16,9 @@ from youtube_mcp.auth.youtube import (
 )
 from youtube_mcp.common.config import settings
 from youtube_mcp.database.engine import create_database_engine
+from youtube_mcp.discovery.similar_channels import (
+    find_similar_channels as discover_similar_channels,
+)
 from youtube_mcp.discovery.similar_videos import (
     SimilarVideoProvider,
 )
@@ -131,6 +134,43 @@ def create_mcp_server(
                     "url": ranked.url,
                 }
                 for ranked in result.videos
+            ],
+        }
+
+    @server.tool()
+    def find_similar_channels(
+        channel_url_handle_or_id: str, max_results: int = 10
+    ) -> dict[str, Any]:
+        """Find similar public channels from bounded metadata and upload samples."""
+        if not 1 <= max_results <= 10:
+            raise ValueError("max_results must be between 1 and 10")
+
+        result = discover_similar_channels(
+            channel_url_handle_or_id,
+            video_provider,
+            quota_preflight=quota_gate,
+            candidate_limit=10,
+            result_limit=max_results,
+            max_queries=3,
+            upload_sample_size=10,
+        )
+        return {
+            "seed": {
+                "channel_id": result.seed.channel_id,
+                "title": result.seed.title,
+                "url": f"https://www.youtube.com/channel/{result.seed.channel_id}",
+            },
+            "search_queries": list(result.search_queries),
+            "results": [
+                {
+                    "channel_id": ranked.channel.channel_id,
+                    "title": ranked.channel.title,
+                    "url": ranked.url,
+                    "score": ranked.score,
+                    "reasons": list(ranked.reasons),
+                    "sampled_upload_count": ranked.sampled_upload_count,
+                }
+                for ranked in result.channels
             ],
         }
 

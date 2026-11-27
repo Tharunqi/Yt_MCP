@@ -112,7 +112,13 @@ class YouTubeProvider:
     ) -> list[ChannelMetadata]:
         limit = self._bounded_limit(max_results, self._config.max_search_results)
         response = self._execute(
-            self._api().search().list(part="snippet", type="channel", q=query, maxResults=limit),
+            self._api().search().list(
+                part="snippet",
+                type="channel",
+                q=query,
+                maxResults=limit,
+                safeSearch="none",
+            ),
             quota_bucket="search",
         )
         ids = [item.get("id", {}).get("channelId") for item in response.get("items", [])]
@@ -121,7 +127,14 @@ class YouTubeProvider:
     def list_recent_uploads(
         self, channel_identifier: str, *, max_results: int | None = None
     ) -> list[VideoMetadata]:
+        """Resolve a channel, then return its bounded recent-upload sample."""
         channel = self.get_channel(channel_identifier)
+        return self.list_channel_uploads(channel, max_results=max_results)
+
+    def list_channel_uploads(
+        self, channel: ChannelMetadata, *, max_results: int | None = None
+    ) -> list[VideoMetadata]:
+        """Fetch uploads for resolved metadata without repeating channel lookup."""
         playlist_id = channel.uploads_playlist_id
         if not playlist_id:
             return []
