@@ -7,4 +7,5 @@
 - Keep Brain notes linked with Obsidian wikilinks and add requirement, issue, and PR links when those IDs exist.
 - Record significant runs and stage reviews in the relevant contributor's `brain/<name>/log.md`.
 - Brain changes must be submitted through a pull request. Do not author notes for another team member.
-- SRS, design, ADR, and traceability deliverables are planned for the end of the project.
+- Shared requirements, architecture, ADRs, API, plan, traceability, test, and release documents belong in `docs/`; update them alongside implementation changes.
+- Keep the root `brain/index.md` deferred until contributors finish their notes; use the contributor indexes in the meantime. `brain/log.md` links to each contributor's canonical log.

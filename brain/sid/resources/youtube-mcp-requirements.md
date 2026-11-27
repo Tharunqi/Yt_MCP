@@ -8,7 +8,7 @@ Given a YouTube video URL or ID, validate and resolve the seed, derive search qu
 
 ## FR-2 — Similar channels
 
-Resolve a channel URL, handle, or ID; fetch public channel metadata and a bounded sample of recent uploads; search candidate channels and/or videos; build channel profiles from descriptions and sampled upload metadata; rank candidates while excluding the input channel. Sample size and similarity signals remain open decisions.
+Resolve a channel URL, handle, or ID; fetch public channel metadata and a bounded sample of recent uploads; search candidate channels; build channel profiles from descriptions and sampled upload metadata; rank candidates while excluding the input channel. Initial defaults are five recent uploads per channel, up to three focused queries, and at most ten candidates. Queries prioritize cleaned channel-description terms, then aggregated non-brand upload tags, then concise upload titles. The score weights channel title 20%, description 30%, and sampled-upload text 50%. See [[docs/adr/0005-fr2-channel-profiles]]; quality evaluation remains open.
 
 ## Shared implementation constraints
 
@@ -27,4 +27,4 @@ Migrations are deferred by the current project decision. `Base.metadata.create_a
 
 ## Current stage reference
 
-FR-1 implementation status, bounds, and its current scoring choices are tracked in [[brain/sid/projects/youtube-mcp-discovery]]. FR-2 design decisions remain open. See also [[brain/sid/resources/second-brain-conventions]] for PARA and review rules.
+FR-1/FR-2 implementation status, bounds, scoring choices, and current verification are tracked in [[brain/sid/projects/youtube-mcp-discovery]]. See [[docs/adr/0005-fr2-channel-profiles]] for the initial FR-2 decision and [[brain/sid/resources/second-brain-conventions]] for PARA and review rules.

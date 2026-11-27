@@ -7,7 +7,7 @@ import pytest
 from youtube_mcp.common.config import Settings
 from youtube_mcp.common.errors import InvalidIdentifierError, ResourceNotFoundError
 from youtube_mcp.common.identifiers import parse_channel_identifier, parse_video_id
-from youtube_mcp.providers.youtube import YouTubeProvider
+from youtube_mcp.providers.youtube import ChannelMetadata, YouTubeProvider
 
 
 class FakeRequest:
@@ -208,3 +208,28 @@ def test_recent_uploads_uses_bounded_sample_and_returns_details() -> None:
     assert len(uploads) == 1
     assert uploads[0].title == "Upload"
     assert client.requests["uploads"].kwargs["maxResults"] == 8
+
+
+def test_list_channel_uploads_uses_resolved_channel_without_lookup() -> None:
+    client = FakeResource(
+        {
+            "uploads": {"items": [{"contentDetails": {"videoId": "abcdefghijk"}}]},
+            "videos_by_id": {
+                "items": [{"id": "abcdefghijk", "snippet": {"title": "Upload"}}]
+            },
+        }
+    )
+    provider = YouTubeProvider(client=client, config=settings())
+    resolved = ChannelMetadata(
+        "UC" + "a" * 22,
+        "A channel",
+        "About",
+        None,
+        "UU" + "a" * 22,
+    )
+
+    uploads = provider.list_channel_uploads(resolved, max_results=3)
+
+    assert uploads[0].title == "Upload"
+    assert client.requests["uploads"].kwargs["maxResults"] == 3
+    assert "channel_lookup" not in client.requests

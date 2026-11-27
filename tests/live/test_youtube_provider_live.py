@@ -4,22 +4,32 @@ Run explicitly with:
     RUN_YOUTUBE_LIVE_TESTS=1 python -m pytest tests/live -q
 """
 
+import asyncio
 import os
 from collections.abc import Callable
 from typing import TypeVar
 
 import pytest
+from sqlalchemy import create_engine
 
 from youtube_mcp.common.config import Settings
 from youtube_mcp.providers.youtube import ChannelMetadata, VideoMetadata, YouTubeProvider
+from youtube_mcp.quota.ledger import SQLAlchemyQuotaLedger
+from youtube_mcp.server import create_mcp_server
 
-pytestmark = pytest.mark.skipif(
-    os.getenv("RUN_YOUTUBE_LIVE_TESTS") != "1",
-    reason="Set RUN_YOUTUBE_LIVE_TESTS=1 to make live YouTube API requests.",
+pytestmark = [
+    pytest.mark.live,
+    pytest.mark.skipif(
+        os.getenv("RUN_YOUTUBE_LIVE_TESTS") != "1",
+        reason="Set RUN_YOUTUBE_LIVE_TESTS=1 to make live YouTube API requests.",
+    ),
+]
+
+# FR-1 uses a video seed; FR-2 uses an independent channel URL seed.
+VIDEO_ID = os.getenv("YOUTUBE_LIVE_VIDEO_ID", "vVVIWEGciKk")
+CHANNEL_IDENTIFIER = os.getenv(
+    "YOUTUBE_LIVE_CHANNEL_IDENTIFIER", "https://www.youtube.com/@gameranxTV"
 )
-
-# Stable public video used only for low-cost metadata read smoke tests.
-VIDEO_ID = os.getenv("YOUTUBE_LIVE_VIDEO_ID", "dQw4w9WgXcQ")
 Result = TypeVar("Result")
 
 
@@ -36,7 +46,7 @@ def _safe_call(label: str, operation: Callable[[], Result]) -> Result:
 
 @pytest.fixture(scope="module")
 def provider() -> YouTubeProvider:
-    config = Settings(max_search_results=3, max_upload_sample=3)
+    config = Settings()
     if not config.api_key:
         pytest.skip("Set YOUTUBE_API_KEY in .env to run live YouTube API tests.")
     return YouTubeProvider(config=config)
@@ -77,3 +87,80 @@ def test_live_recent_uploads_are_bounded_and_have_metadata(
 
     assert len(uploads) <= 3
     assert all(upload.video_id and upload.title for upload in uploads)
+
+
+def test_live_channel_search_returns_public_metadata(provider: YouTubeProvider) -> None:
+    channels = _safe_call(
+        "Channel search request",
+        lambda: provider.search_channels("python programming", max_results=2),
+    )
+
+    assert len(channels) <= 2
+    assert all(channel.channel_id and channel.title for channel in channels)
+
+
+def test_live_mcp_discovery_returns_video_and_channel_matches(
+    provider: YouTubeProvider, live_video: VideoMetadata
+) -> None:
+    """Exercise FR-1 with a video and FR-2 with a separate channel URL seed."""
+    engine = create_engine("sqlite:///:memory:")
+    config = Settings()
+    ledger = SQLAlchemyQuotaLedger(
+        engine,
+        standard_daily_limit=config.default_quota_daily_limit,
+        search_daily_limit=config.search_quota_daily_limit,
+    )
+    server = create_mcp_server(provider, ledger)
+
+    try:
+        video_result = _safe_call(
+            "Similar-video MCP request",
+            lambda: asyncio.run(
+                server.call_tool(
+                    "find_similar_videos",
+                    {"video_url_or_id": VIDEO_ID, "max_results": 10},
+                )
+            ),
+        )
+        _, similar_videos = video_result
+        assert similar_videos["seed"]["video_id"] == VIDEO_ID
+        assert 1 <= len(similar_videos["search_queries"]) <= 3
+        assert similar_videos["results"], "FR-1 returned no similar videos for the seed."
+        assert len(similar_videos["results"]) <= 10
+        print(f"Similar videos returned ({len(similar_videos['results'])}):")
+        for video in similar_videos["results"]:
+            print(f"  {video['score']:.4f} {video['title']} — {video['url']}")
+
+        channel_result = _safe_call(
+            "Similar-channel MCP request",
+            lambda: asyncio.run(
+                server.call_tool(
+                    "find_similar_channels",
+                    {
+                        "channel_url_handle_or_id": CHANNEL_IDENTIFIER,
+                        "max_results": 10,
+                    },
+                )
+            ),
+        )
+        _, similar_channels = channel_result
+        assert similar_channels["seed"]["channel_id"]
+        assert 1 <= len(similar_channels["search_queries"]) <= 3
+        print(f"FR-2 search queries from the channel profile: {similar_channels['search_queries']}")
+        print(
+            f"Similar channels returned for {similar_channels['seed']['title']} "
+            f"({len(similar_channels['results'])}):"
+        )
+        for channel in similar_channels["results"]:
+            print(f"  {channel['score']:.4f} {channel['title']} — {channel['url']}")
+        assert similar_channels["results"], (
+            f"FR-2 returned no similar channels for {similar_channels['seed']['title']}; "
+            f"queries={similar_channels['search_queries']}"
+        )
+        assert len(similar_channels["results"]) <= 10
+        assert all(
+            channel["channel_id"] != live_video.channel_id
+            for channel in similar_channels["results"]
+        )
+    finally:
+        engine.dispose()
