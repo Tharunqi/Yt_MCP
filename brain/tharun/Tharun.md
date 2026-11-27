@@ -6,7 +6,7 @@
 - **FR-5:** Playlist suggestions and creation — implemented, unit-checked, and previewed live. No playlist was created.
 - **FR-7:** Playlist and video analysis — next.
 
-I will work only on these three FRs. See [[projects/youtube-mcp]] for project status and [[log]] for run records.
+I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] for project status and [[brain/tharun/log]] for run records.
 
 ## FR-4 progress
 
@@ -32,8 +32,8 @@ I will work only on these three FRs. See [[projects/youtube-mcp]] for project st
 
 ## Second Brain
 
-- Start from [[index]] and use the [[second-brain-workflow]] note.
-- Use the [brain-ingest](../skills/brain-ingest/SKILL.md), [brain-refine](../skills/brain-refine/SKILL.md), and [brain-query](../skills/brain-query/SKILL.md) skills.
+- Start from [[brain/tharun/index]] and use the [[second-brain-workflow]] note.
+- Use the [brain-ingest](../../skills/brain-ingest/SKILL.md), [brain-refine](../../skills/brain-refine/SKILL.md), and [brain-query](../../skills/brain-query/SKILL.md) skills.
 - Keep Brain changes for a pull request. This update is still local and uncommitted.
 - Sid and Viraj should write their own notes; I will not write notes for them.
 

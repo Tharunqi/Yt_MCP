@@ -20,4 +20,4 @@ Check FR-4 analysis and an FR-5 playlist preview with the signed-in YouTube acco
 
 ## Next step
 
-When Tharun is ready, retry the regular build, connect with an MCP client, review a fresh preview, and confirm before any playlist write. See [[youtube-mcp]] and [[log]].
+When Tharun is ready, retry the regular build, connect with an MCP client, review a fresh preview, and confirm before any playlist write. See [[youtube-mcp]] and [[brain/tharun/log]].
