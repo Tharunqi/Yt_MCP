@@ -70,6 +70,35 @@ def estimate_similar_video_quota(*, max_queries: int = 3) -> QuotaEstimate:
     )
 
 
+def estimate_engagement_quota(*, max_playlists: int = 5) -> QuotaEstimate:
+    """Reserve a bounded FR-4 read of account and selected playlist data.
+
+    The workflow reads at most 1,000 likes, 1,000 subscriptions, and 1,000
+    items from each of at most five selected playlists. Video details are
+    fetched in batches of 50, followed by one category lookup.
+    """
+    if not 0 <= max_playlists <= 5:
+        raise ValueError("max_playlists must be between 0 and 5")
+    pages_per_source = 20
+    video_batches = 20 * (1 + max_playlists)
+    return QuotaEstimate(
+        default_bucket_units=pages_per_source * (2 + max_playlists) + video_batches + 1,
+        search_query_calls=0,
+    )
+
+
+def estimate_playlist_preview_quota() -> QuotaEstimate:
+    """Reserve one bounded search and one batched video-details request."""
+    return QuotaEstimate(default_bucket_units=1, search_query_calls=1)
+
+
+def estimate_playlist_creation_quota(video_count: int) -> QuotaEstimate:
+    """Reserve channel lookup plus 50 units for each playlist write."""
+    if video_count < 1:
+        raise ValueError("video_count must be positive")
+    return QuotaEstimate(default_bucket_units=1 + 50 + 50 * video_count, search_query_calls=0)
+
+
 def estimate_similar_channels_quota(
     *, candidate_limit: int = 10, max_queries: int = 3
 ) -> QuotaEstimate:

@@ -139,3 +139,42 @@ def test_provider_batches_video_requests_at_50_ids() -> None:
     YouTubeDataProvider(client).get_videos(ids)
 
     assert [len(call["id"].split(",")) for call in client.video_resource.details.calls] == [50, 1]
+
+
+def test_subscription_read_stops_at_1000_items() -> None:
+    pages = [
+        {
+            "items": [
+                {"snippet": {"title": f"Channel {index}", "resourceId": {"channelId": str(index)}}}
+                for index in range(50)
+            ],
+            "nextPageToken": f"page-{page + 1}",
+        }
+        for page in range(21)
+    ]
+    client = FakeClient()
+    client.subscription_resource = FakeResource(pages)
+
+    subscriptions = YouTubeDataProvider(client).list_subscriptions()
+
+    assert len(subscriptions) == 1000
+    assert len(client.subscription_resource.calls) == 20
+
+
+def test_subscription_read_stops_after_20_pages_even_with_sparse_pages() -> None:
+    pages = [
+        {
+            "items": [
+                {"snippet": {"title": "Channel", "resourceId": {"channelId": str(page)}}}
+            ],
+            "nextPageToken": f"page-{page + 1}",
+        }
+        for page in range(21)
+    ]
+    client = FakeClient()
+    client.subscription_resource = FakeResource(pages)
+
+    subscriptions = YouTubeDataProvider(client).list_subscriptions()
+
+    assert len(subscriptions) == 20
+    assert len(client.subscription_resource.calls) == 20

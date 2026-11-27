@@ -36,7 +36,7 @@ operation that needs them.
 | Engagement calculations | `src/youtube_mcp/engagement/` | FR-4 present |
 | Playlist planning/preview/write | `src/youtube_mcp/playlists/` | FR-5 present |
 | OAuth helpers | `src/youtube_mcp/auth/` | Used for private data and writes |
-| Quota reservations | `src/youtube_mcp/quota/` | SQLAlchemy ledger and preflight |
+| Quota reservations | `src/youtube_mcp/quota/` | SQLAlchemy ledger; preflight for FR-1/2/4/5/6; FR-4 bounded reads; playlist writes cost 50 units each |
 | Recommendations, metadata summary, playlist analytics | `recommendations/`, `summarization/`, `analytics/` | FR-3/6/7 implementation incomplete |
 
 ## Video-to-playlist sequence
@@ -57,12 +57,14 @@ sequenceDiagram
     MCP->>API: Bounded search and metadata fetch
     MCP-->>Host: Ranked candidates with reasons
     Host->>MCP: Preview constrained playlist (FR-5)
+    MCP->>DB: Reserve search and metadata quota
     MCP->>API: Read-only candidate metadata
     MCP-->>Host: Preview title, items, duration, visibility
     Host-->>User: Present preview and ask for explicit confirmation
     User->>Host: Confirm or decline
     opt Explicit confirmation only
       Host->>MCP: Create from preview with confirmation
+      MCP->>DB: Reserve channel check and playlist write quota
       MCP->>API: Create playlist and add items
       MCP-->>Host: Accurate full/partial write result
       Host->>MCP: Analyze playlist (FR-7)

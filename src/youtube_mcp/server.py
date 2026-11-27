@@ -44,9 +44,14 @@ from youtube_mcp.providers.youtube import (
 )
 from youtube_mcp.quota.ledger import SQLAlchemyQuotaLedger
 from youtube_mcp.quota.preflight import (
+    QuotaEstimate,
     QuotaPreflight,
     UnavailableQuotaPreflight,
+    estimate_engagement_quota,
+    estimate_playlist_creation_quota,
+    estimate_playlist_preview_quota,
 )
+from youtube_mcp.quota.usage import QuotaUsage, quota_usage_context
 from youtube_mcp.summarization.metadata_summary import (
     summarize_video_metadata as build_metadata_summary,
 )
@@ -75,6 +80,22 @@ def _configured_quota_preflight(database_url: str | None) -> QuotaPreflight:
         standard_daily_limit=settings.default_quota_daily_limit,
         search_daily_limit=settings.search_quota_daily_limit,
     )
+
+
+def _run_with_quota(
+    quota_preflight: QuotaPreflight, estimate: QuotaEstimate, operation: Any
+) -> Any:
+    """Reserve before API access and settle actual provider usage afterward."""
+    reservation = quota_preflight.check_and_reserve(estimate)
+    usage = QuotaUsage()
+    try:
+        with quota_usage_context(usage):
+            result = operation()
+    except BaseException:
+        reservation.settle(usage.estimate())
+        raise
+    reservation.settle(usage.estimate())
+    return result
 
 
 def create_mcp_server(
@@ -189,7 +210,8 @@ def create_mcp_server(
     return server
 
 
-mcp = create_mcp_server()
+_feature_quota_preflight = _configured_quota_preflight(os.getenv("DATABASE_URL"))
+mcp = create_mcp_server(quota_preflight=_feature_quota_preflight)
 
 
 @mcp.tool()
@@ -213,7 +235,11 @@ def analyze_engagement(
 
     playlist_ids = validate_playlist_ids(selected_playlist_ids)
     provider = YouTubeDataProvider(build_youtube_client())
-    data = fetch_engagement_data(provider, playlist_ids)
+    data = _run_with_quota(
+        _feature_quota_preflight,
+        estimate_engagement_quota(max_playlists=len(playlist_ids)),
+        lambda: fetch_engagement_data(provider, playlist_ids),
+    )
     return analyze_engagement_data(
         data, start, end, comparison_start, comparison_end
     )
@@ -238,12 +264,18 @@ def preview_playlist(
         visibility,
     )
     provider = YouTubeDataProvider(build_youtube_client())
-    candidates = provider.search_videos(request.topic, request.language_code)
-    video_ids = list(dict.fromkeys(candidate.video_id for candidate in candidates))
-    videos = provider.get_videos(video_ids)
-    plan = build_playlist_plan(request, candidates, videos)
-    preview_id = playlist_previews.create(plan)
-    return preview_result(plan, preview_id)
+
+    def build_preview() -> dict[str, object]:
+        candidates = provider.search_videos(request.topic, request.language_code)
+        video_ids = list(dict.fromkeys(candidate.video_id for candidate in candidates))
+        videos = provider.get_videos(video_ids)
+        plan = build_playlist_plan(request, candidates, videos)
+        preview_id = playlist_previews.create(plan)
+        return preview_result(plan, preview_id)
+
+    return _run_with_quota(
+        _feature_quota_preflight, estimate_playlist_preview_quota(), build_preview
+    )
 
 
 @mcp.tool()
@@ -284,70 +316,78 @@ def create_playlist_from_preview(
         }
 
     provider = YouTubeDataProvider(client)
-    try:
-        channel_id = provider.get_my_channel_id()
-    except HttpError as error:
-        if youtube_error_reason(error) == "youtubeSignupRequired":
-            return _channel_setup_result()
-        return {
-            "status": "failed",
-            "message": "YouTube could not check whether this account has a channel.",
-            "playlist_created": False,
-        }
-    if not channel_id:
-        return _channel_setup_result()
 
-    try:
-        playlist_id = provider.create_playlist(
-            plan.request.title, plan.request.visibility
-        )
-    except HttpError as error:
-        if youtube_error_reason(error) == "youtubeSignupRequired":
-            return _channel_setup_result()
-        return {
-            "status": "failed",
-            "message": "YouTube could not create the playlist.",
-            "playlist_created": False,
-        }
-    except RuntimeError:
-        return {
-            "status": "failed",
-            "message": "YouTube did not confirm that the playlist was created.",
-            "playlist_created": False,
-        }
-
-    added_video_ids: list[str] = []
-    failed_items: list[dict[str, str]] = []
-    for item in plan.items:
-        video_id = str(item["video_id"])
+    def create_playlist() -> dict[str, object]:
         try:
-            provider.add_video_to_playlist(playlist_id, video_id)
+            channel_id = provider.get_my_channel_id()
         except HttpError as error:
-            reason = youtube_error_reason(error)
-            if reason == "youtubeSignupRequired":
-                message = "The account needs a YouTube channel to add playlist videos."
-            else:
-                message = "YouTube rejected this video."
-            failed_items.append({"video_id": video_id, "message": message})
-        else:
-            added_video_ids.append(video_id)
+            if youtube_error_reason(error) == "youtubeSignupRequired":
+                return _channel_setup_result()
+            return {
+                "status": "failed",
+                "message": "YouTube could not check whether this account has a channel.",
+                "playlist_created": False,
+            }
+        if not channel_id:
+            return _channel_setup_result()
 
-    status = "completed" if not failed_items else "partial"
-    return {
-        "status": status,
-        "playlist_created": True,
-        "playlist_id": playlist_id,
-        "playlist_url": f"https://www.youtube.com/playlist?list={playlist_id}",
-        "playlist_title": plan.request.title,
-        "visibility": plan.request.visibility,
-        "added_video_ids": added_video_ids,
-        "failed_items": failed_items,
-        "message": (
-            "Playlist created and all planned videos were added."
-            if not failed_items
-            else "Playlist created, but some videos were not added. See failed_items."
-        ),
-    }
+        try:
+            playlist_id = provider.create_playlist(
+                plan.request.title, plan.request.visibility
+            )
+        except HttpError as error:
+            if youtube_error_reason(error) == "youtubeSignupRequired":
+                return _channel_setup_result()
+            return {
+                "status": "failed",
+                "message": "YouTube could not create the playlist.",
+                "playlist_created": False,
+            }
+        except RuntimeError:
+            return {
+                "status": "failed",
+                "message": "YouTube did not confirm that the playlist was created.",
+                "playlist_created": False,
+            }
+
+        added_video_ids: list[str] = []
+        failed_items: list[dict[str, str]] = []
+        for item in plan.items:
+            video_id = str(item["video_id"])
+            try:
+                provider.add_video_to_playlist(playlist_id, video_id)
+            except HttpError as error:
+                reason = youtube_error_reason(error)
+                if reason == "youtubeSignupRequired":
+                    message = "The account needs a YouTube channel to add playlist videos."
+                else:
+                    message = "YouTube rejected this video."
+                failed_items.append({"video_id": video_id, "message": message})
+            else:
+                added_video_ids.append(video_id)
+
+        status = "completed" if not failed_items else "partial"
+        return {
+            "status": status,
+            "playlist_created": True,
+            "playlist_id": playlist_id,
+            "playlist_url": f"https://www.youtube.com/playlist?list={playlist_id}",
+            "playlist_title": plan.request.title,
+            "visibility": plan.request.visibility,
+            "added_video_ids": added_video_ids,
+            "failed_items": failed_items,
+            "message": (
+                "Playlist created and all planned videos were added."
+                if not failed_items
+                else "Playlist created, but some videos were not added. See failed_items."
+            ),
+        }
+
+    return _run_with_quota(
+        _feature_quota_preflight,
+        estimate_playlist_creation_quota(len(plan.items)),
+        create_playlist,
+    )
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
