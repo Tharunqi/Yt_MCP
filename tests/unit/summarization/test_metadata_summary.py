@@ -124,7 +124,7 @@ def test_invalid_identifier_is_rejected_before_quota_or_provider_call() -> None:
     quota = FakeQuotaPreflight()
 
     with pytest.raises(InvalidIdentifierError):
-        summarize_video_metadata("not-a-video", provider, quota_preflight=quota)
+        summarize_video_metadata("short-id", provider, quota_preflight=quota)
 
     assert quota.estimates == []
     assert provider.calls == []
