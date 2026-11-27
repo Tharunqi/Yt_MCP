@@ -12,7 +12,7 @@ GitHub Issue/PR; no identifiers are fabricated. Requirement details are in the
 | FR-3 | `recommendations/`, `auth/`; Viraj | No feature tests identified | Planned; shared requirements in [[brain/sid/resources/youtube-mcp-requirements]] | Not created |
 | FR-4 | `engagement/`, `auth/`; Tharun | `tests/unit/engagement/`; `tests/unit/test_server.py`; live account check documented by owner | Owner-maintained [[brain/tharun/projects/youtube-mcp]] | Not created |
 | FR-5 | `playlists/`, `auth/`; Tharun | `tests/unit/playlists/`; `tests/unit/test_youtube_playlist_provider.py`; prior live preview in owner note | Owner-maintained [[brain/tharun/projects/youtube-mcp]] | Not created |
-| FR-6 | `summarization/`; Viraj | No feature tests identified | Planned; shared requirements in [[brain/sid/resources/youtube-mcp-requirements]] | Not created |
+| FR-6 | `summarization/`, `providers/`; Viraj | `tests/unit/summarization/test_metadata_summary.py`; `tests/unit/providers/test_youtube_provider.py`; `tests/integration/test_summarization_mcp.py` | Metadata-only summary tool; shared requirements in [[brain/sid/resources/youtube-mcp-requirements]] | Not created |
 | FR-7 | `analytics/`; Tharun | No feature tests identified | Owner-maintained [[brain/tharun/projects/youtube-mcp]] | Not created |
 | SK-1 | `skills/video-to-playlist/`; shared | Skill evaluation and MCP E2E still blocked on FR-6/FR-7 implementation | Product skill and [[brain/tharun/resources/second-brain-workflow]] | Not created |
 | NFR-QUOTA-01–03 | `quota/`, `database/`; Sid | `tests/unit/quota/test_ledger.py`; no PostgreSQL concurrency test yet | [[brain/sid/resources/youtube-mcp-requirements#Quota model|quota note]]; ADR-0003 | Not created |

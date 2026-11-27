@@ -47,6 +47,9 @@ from youtube_mcp.quota.preflight import (
     QuotaPreflight,
     UnavailableQuotaPreflight,
 )
+from youtube_mcp.summarization.metadata_summary import (
+    summarize_video_metadata as build_metadata_summary,
+)
 
 playlist_previews = PlaylistPreviewStore()
 
@@ -136,6 +139,15 @@ def create_mcp_server(
                 for ranked in result.videos
             ],
         }
+
+    @server.tool()
+    def summarize_video_metadata(video_url_or_id: str) -> dict[str, object]:
+        """Summarize a public video using available metadata only."""
+        return build_metadata_summary(
+            video_url_or_id,
+            video_provider,
+            quota_preflight=quota_gate,
+        )
 
     @server.tool()
     def find_similar_channels(
