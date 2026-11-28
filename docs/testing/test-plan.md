@@ -5,8 +5,8 @@ independent of live YouTube. Live tests are opt-in and supplemental.
 
 | Requirement | Verification approach | Current evidence | Remaining |
 |---|---|---|---|
-| TQ-1 unit | Deterministic unit tests for feature logic, validators, ranking, quota, planner, and tools | Current historical run: 68 passed; FR-3 service tests added in `tests/unit/recommendations/test_service.py` | Execute the new FR-3 tests in CI; add remaining FR-7 coverage |
-| TQ-2 integration | Fakes/fixtures across provider and feature boundaries | `tests/integration/test_discovery_mcp.py`; FR-3 MCP flow coverage added in `tests/integration/test_recommendations_mcp.py` | Execute FR-3 integration tests in CI; broader auth, engagement, playlist, and provider integration matrix |
+| TQ-1 unit | Deterministic unit tests for feature logic, validators, ranking, quota, planner, and tools | GitHub CI passed: 89 passed, 5 opt-in live tests skipped; FR-3 service tests in `tests/unit/recommendations/test_service.py` | Add remaining FR-7 coverage |
+| TQ-2 integration | Fakes/fixtures across provider and feature boundaries | `tests/integration/test_discovery_mcp.py`; FR-3 MCP flow covered in `tests/integration/test_recommendations_mcp.py`; GitHub CI passed | Broader auth, engagement, playlist, and provider integration matrix |
 | TQ-3 system/E2E | Invoke tools through MCP for FR-1–FR-7 | No complete FR-1–FR-7 E2E currently | Build E2E per implemented feature and SK-1 |
 | TQ-4 negative | Invalid/unavailable IDs, missing metadata, quota, expired OAuth, API errors | Existing FR-1 and playlist negatives | Complete error matrix for each feature/provider |
 | TQ-5 CI isolation | Run mocks/fixtures without live API credentials | CI runs pytest with live tests skipped unless opted in | Keep live tests out of required CI path |
@@ -51,3 +51,7 @@ See [local-check](../../skills/local-check/SKILL.md),
 - Local Python tests, Ruff, package build, and documentation validation could
   not run because this Windows environment has no installed Python interpreter.
   `git diff --check` passed. CI remains the execution gate for the added tests.
+
+- Follow-up: GitHub CI passed on commit `23a4d59` (89 passed, 5 opt-in live
+  tests skipped). Ruff, package build, repository-doc validation, and secret
+  scanning also passed. The PR remains a draft pending maintainer review.
