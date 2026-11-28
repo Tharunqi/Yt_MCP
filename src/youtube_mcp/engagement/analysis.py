@@ -32,6 +32,9 @@ def parse_period(start_value: str, end_value: str) -> tuple[date, date]:
     return start, end
 
 
+MAX_SELECTED_PLAYLISTS = 5
+
+
 def validate_playlist_ids(playlist_ids: list[str] | None) -> list[str]:
     if playlist_ids is None:
         return []
@@ -43,7 +46,10 @@ def validate_playlist_ids(playlist_ids: list[str] | None) -> list[str]:
         for playlist_id in playlist_ids
     ):
         raise ValueError("Playlist IDs must contain 1 to 128 letters, numbers, _ or -.")
-    return list(dict.fromkeys(playlist_ids))
+    unique_ids = list(dict.fromkeys(playlist_ids))
+    if len(unique_ids) > MAX_SELECTED_PLAYLISTS:
+        raise ValueError("Select no more than 5 playlists.")
+    return unique_ids
 
 
 def fetch_engagement_data(
@@ -197,8 +203,9 @@ def analyze_period(
         },
         "sources": [
             "YouTube liked videos (up to the latest 1,000 available)",
-            "YouTube subscription-created dates",
-            "Selected YouTube playlist items and added dates",
+            "YouTube subscription-created dates (up to 1,000 subscriptions)",
+            "Selected playlist items and added dates "
+            "(up to 5 playlists, 1,000 items each)",
             "YouTube video channel, category, publish date, and duration metadata",
         ],
     }
@@ -310,6 +317,8 @@ def analyze_engagement_data(
             "can appear in trends.",
             "These results describe liked and saved content, not watch time.",
             "Results are calculated for this request and are not saved.",
+            "Analysis reads up to 1,000 subscriptions and 1,000 items from "
+            "each of up to 5 selected playlists.",
         ],
     }
     return result

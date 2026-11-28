@@ -30,16 +30,16 @@ operation that needs them.
 
 | Concern | Repository location | Status |
 |---|---|---|
-| MCP entry point and tool registration | `src/youtube_mcp/server.py` | FR-1, FR-4, implemented FR-5 tools |
+| MCP entry point and tool registration | `src/youtube_mcp/server.py` | FR-1, FR-4, FR-5, FR-7 tools |
 | YouTube API adapters | `src/youtube_mcp/providers/youtube.py` | Shared provider classes |
 | Public video and channel discovery | `src/youtube_mcp/discovery/similar_videos.py`, `src/youtube_mcp/discovery/similar_channels.py` | FR-1 and FR-2 implemented with bounded candidate pools |
 | Engagement calculations | `src/youtube_mcp/engagement/` | FR-4 present |
 | Playlist planning/preview/write | `src/youtube_mcp/playlists/` | FR-5 present |
 | OAuth helpers | `src/youtube_mcp/auth/` | Used for private data and writes |
-| Quota reservations | `src/youtube_mcp/quota/` | SQLAlchemy ledger and preflight |
-| Personalized recommendations | `src/youtube_mcp/recommendations/`, `auth/`, `providers/`, `quota/` | FR-3 ranking and request-time MCP workflow implemented; automated integration coverage and team review remain |
+| Quota reservations | `src/youtube_mcp/quota/` | SQLAlchemy ledger; preflight for FR-1/2/3/4/5/6/7; bounded reads; playlist writes cost 50 units each |
+| Personalized recommendations | `src/youtube_mcp/recommendations/`, `auth/`, `providers/`, `quota/` | FR-3 ranking and request-time MCP workflow implemented with unit/integration coverage; PR #11 review remains |
 | Metadata summary | `src/youtube_mcp/summarization/` | FR-6 metadata-only MCP tool implemented |
-| Playlist analytics | `src/youtube_mcp/analytics/` | FR-7 implementation incomplete |
+| Playlist analysis | `src/youtube_mcp/analytics/playlist_analysis.py` | FR-7 present; bounded and request-scoped |
 
 ## Video-to-playlist sequence
 
@@ -59,12 +59,14 @@ sequenceDiagram
     MCP->>API: Bounded search and metadata fetch
     MCP-->>Host: Ranked candidates with reasons
     Host->>MCP: Preview constrained playlist (FR-5)
+    MCP->>DB: Reserve search and metadata quota
     MCP->>API: Read-only candidate metadata
     MCP-->>Host: Preview title, items, duration, visibility
     Host-->>User: Present preview and ask for explicit confirmation
     User->>Host: Confirm or decline
     opt Explicit confirmation only
       Host->>MCP: Create from preview with confirmation
+      MCP->>DB: Reserve channel check and playlist write quota
       MCP->>API: Create playlist and add items
       MCP-->>Host: Accurate full/partial write result
       Host->>MCP: Analyze playlist (FR-7)
@@ -73,8 +75,8 @@ sequenceDiagram
     end
 ```
 
-FR-6 and FR-7 sequence steps are target behavior and require implementation
-before this E2E flow is complete.
+FR-6 metadata summaries and FR-7 playlist analysis are implemented. The full
+SK-1 host-to-tool end-to-end workflow still needs a product check.
 
 ## Quota data model (implemented records)
 

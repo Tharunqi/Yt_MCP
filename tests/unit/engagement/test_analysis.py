@@ -176,3 +176,10 @@ def test_playlist_ids_are_checked_and_deduplicated() -> None:
     assert validate_playlist_ids(["PL123456789", "PL123456789"]) == ["PL123456789"]
     with pytest.raises(ValueError, match="Playlist IDs"):
         validate_playlist_ids([""])
+
+
+def test_playlist_selection_is_bounded() -> None:
+    ids = [f"playlist_{index}" for index in range(6)]
+
+    with pytest.raises(ValueError, match="no more than 5"):
+        validate_playlist_ids(ids)

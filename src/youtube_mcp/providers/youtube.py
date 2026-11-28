@@ -17,6 +17,9 @@ from youtube_mcp.quota.usage import QuotaBucket, record_api_call
 
 _PAGE_SIZE = 50
 _MAX_LIKED_VIDEOS = 1000
+_MAX_SUBSCRIPTIONS = 1000
+_MAX_PLAYLIST_ITEMS = 1000
+_MAX_SOURCE_PAGES = 20
 _DURATION_PATTERN = re.compile(
     r"P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?"
 )
@@ -281,21 +284,42 @@ def _duration_seconds(value: str | None) -> int | None:
     return days * 86400 + hours * 3600 + minutes * 60 + seconds
 
 
+def _execute(
+    request: Any, *, quota_bucket: QuotaBucket = "standard", quota_units: int = 1
+) -> dict[str, Any]:
+    """Count an attempted YouTube API request before sending it."""
+    record_api_call(quota_bucket, units=quota_units)
+    return request.execute()
+
+
 def _pages(
-    resource: Any, *, max_pages: int | None = None, **params: object
+    resource: Any,
+    *,
+    max_items: int | None = None,
+    max_pages: int | None = None,
+    quota_bucket: QuotaBucket = "standard",
+    quota_units: int = 1,
+    **params: object,
 ) -> Iterator[dict[str, Any]]:
     page_token = None
-    pages = 0
+    item_count = 0
+    page_count = 0
     while True:
         request = dict(params)
         if page_token:
             request["pageToken"] = page_token
-        record_api_call("standard")
-        response = resource.list(**request).execute()
-        pages += 1
+        response = _execute(
+            resource.list(**request), quota_bucket=quota_bucket, quota_units=quota_units
+        )
         yield response
+        page_count += 1
+        item_count += len(response.get("items", []))
+        if (max_items is not None and item_count >= max_items) or (
+            max_pages is not None and page_count >= max_pages
+        ):
+            return
         page_token = response.get("nextPageToken")
-        if not page_token or (max_pages is not None and pages >= max_pages):
+        if not page_token:
             return
 
 
@@ -309,6 +333,8 @@ class YouTubeDataProvider:
         video_ids: list[str] = []
         for response in _pages(
             self._client.videos(),
+            max_items=_MAX_LIKED_VIDEOS,
+            max_pages=_MAX_SOURCE_PAGES,
             part="id,snippet,contentDetails",
             myRating="like",
             maxResults=_PAGE_SIZE,
@@ -332,10 +358,11 @@ class YouTubeDataProvider:
             page_limit = (max_results + _PAGE_SIZE - 1) // _PAGE_SIZE
         for response in _pages(
             self._client.subscriptions(),
+            max_items=_MAX_SUBSCRIPTIONS,
             part="snippet",
             mine=True,
             maxResults=_PAGE_SIZE,
-            max_pages=page_limit,
+            max_pages=min(page_limit or _MAX_SOURCE_PAGES, _MAX_SOURCE_PAGES),
         ):
             for item in response.get("items", []):
                 snippet = item.get("snippet", {})
@@ -362,10 +389,11 @@ class YouTubeDataProvider:
             page_limit = (max_results + _PAGE_SIZE - 1) // _PAGE_SIZE
         for response in _pages(
             self._client.playlistItems(),
+            max_items=_MAX_PLAYLIST_ITEMS,
             part="snippet,contentDetails",
             playlistId=playlist_id,
             maxResults=_PAGE_SIZE,
-            max_pages=page_limit,
+            max_pages=min(page_limit or _MAX_SOURCE_PAGES, _MAX_SOURCE_PAGES),
         ):
             for item in response.get("items", []):
                 snippet = item.get("snippet", {})
@@ -396,8 +424,9 @@ class YouTubeDataProvider:
         }
         if language_code:
             params["relevanceLanguage"] = language_code
-        record_api_call("search")
-        response = self._client.search().list(**params).execute()
+        response = _execute(
+            self._client.search().list(**params), quota_bucket="search"
+        )
         candidates: list[SearchVideo] = []
         for item in response.get("items", []):
             video_id = item.get("id", {}).get("videoId")
@@ -413,25 +442,22 @@ class YouTubeDataProvider:
         return candidates
 
     def get_my_channel_id(self) -> str | None:
-        response = (
-            self._client.channels()
-            .list(part="id", mine=True, maxResults=1)
-            .execute()
+        response = _execute(
+            self._client.channels().list(part="id", mine=True, maxResults=1)
         )
         items = response.get("items", [])
         return items[0].get("id") if items else None
 
     def create_playlist(self, title: str, visibility: str) -> str:
-        response = (
-            self._client.playlists()
-            .insert(
+        response = _execute(
+            self._client.playlists().insert(
                 part="snippet,status",
                 body={
                     "snippet": {"title": title},
                     "status": {"privacyStatus": visibility},
                 },
-            )
-            .execute()
+            ),
+            quota_units=50,
         )
         playlist_id = response.get("id")
         if not isinstance(playlist_id, str) or not playlist_id:
@@ -439,9 +465,8 @@ class YouTubeDataProvider:
         return playlist_id
 
     def add_video_to_playlist(self, playlist_id: str, video_id: str) -> None:
-        (
-            self._client.playlistItems()
-            .insert(
+        _execute(
+            self._client.playlistItems().insert(
                 part="snippet",
                 body={
                     "snippet": {
@@ -449,19 +474,18 @@ class YouTubeDataProvider:
                         "resourceId": {"kind": "youtube#video", "videoId": video_id},
                     }
                 },
-            )
-            .execute()
+            ),
+            quota_units=50,
         )
 
     def get_videos(self, video_ids: list[str]) -> dict[str, VideoDetails]:
         videos: dict[str, VideoDetails] = {}
         for start in range(0, len(video_ids), _PAGE_SIZE):
             batch = video_ids[start : start + _PAGE_SIZE]
-            record_api_call("standard")
-            response = (
-                self._client.videos()
-                .list(part="snippet,contentDetails", id=",".join(batch))
-                .execute()
+            response = _execute(
+                self._client.videos().list(
+                    part="snippet,contentDetails", id=",".join(batch)
+                )
             )
             for item in response.get("items", []):
                 snippet = item.get("snippet", {})
@@ -489,11 +513,10 @@ class YouTubeDataProvider:
     def get_category_names(self, category_ids: list[str]) -> dict[str, str]:
         if not category_ids:
             return {}
-        record_api_call("standard")
-        response = (
-            self._client.videoCategories()
-            .list(part="snippet", id=",".join(category_ids))
-            .execute()
+        response = _execute(
+            self._client.videoCategories().list(
+                part="snippet", id=",".join(category_ids)
+            )
         )
         return {
             item["id"]: item["snippet"]["title"]

@@ -20,12 +20,14 @@ class QuotaUsage:
     default_bucket_units: int = 0
     search_query_calls: int = 0
 
-    def record(self, bucket: QuotaBucket) -> None:
-        """Count one API request in the correct quota bucket."""
+    def record(self, bucket: QuotaBucket, *, units: int = 1) -> None:
+        """Count quota units for one attempted request."""
+        if not isinstance(units, int) or isinstance(units, bool) or units < 1:
+            raise ValueError("Quota units must be a positive integer")
         if bucket == "standard":
-            self.default_bucket_units += 1
+            self.default_bucket_units += units
         elif bucket == "search":
-            self.search_query_calls += 1
+            self.search_query_calls += units
 
     def estimate(self) -> QuotaEstimate:
         """Return an immutable snapshot for settling the request reservation."""
@@ -45,8 +47,8 @@ def quota_usage_context(usage: QuotaUsage) -> Iterator[None]:
         _CURRENT_USAGE.reset(token)
 
 
-def record_api_call(bucket: QuotaBucket) -> None:
+def record_api_call(bucket: QuotaBucket, *, units: int = 1) -> None:
     """Count an API attempt when a workflow recorder is active."""
     usage = _CURRENT_USAGE.get()
     if usage is not None:
-        usage.record(bucket)
+        usage.record(bucket, units=units)
