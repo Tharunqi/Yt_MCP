@@ -5,8 +5,8 @@ independent of live YouTube. Live tests are opt-in and supplemental.
 
 | Requirement | Verification approach | Current evidence | Remaining |
 |---|---|---|---|
-| TQ-1 unit | Deterministic unit tests for feature logic, validators, ranking, quota, planner, and tools | Before merging the latest FR-7 work, GitHub CI passed: 89 passed, 5 opt-in live tests skipped; FR-3 service tests are in `tests/unit/recommendations/test_service.py` | Rerun full suite on the updated branch; add remaining feature coverage |
-| TQ-2 integration | Fakes/fixtures across provider and feature boundaries | `tests/integration/test_discovery_mcp.py`; FR-3 MCP flow in `tests/integration/test_recommendations_mcp.py`; GitHub CI passed before latest merge | Rerun on updated branch; broader auth, engagement, playlist, and provider integration matrix |
+| TQ-1 unit | Deterministic unit tests for feature logic, validators, ranking, quota, planner, and tools | GitHub CI passed on merged branch `ba3e2bb`; 5 opt-in live tests are skipped; FR-3 service tests are in `tests/unit/recommendations/test_service.py` | Add remaining feature coverage as requirements are completed |
+| TQ-2 integration | Fakes/fixtures across provider and feature boundaries | `tests/integration/test_discovery_mcp.py`; FR-3 MCP flow in `tests/integration/test_recommendations_mcp.py`; GitHub CI passed on merged branch `ba3e2bb` | Broader auth, engagement, playlist, and provider integration matrix |
 | TQ-3 system/E2E | Invoke tools through MCP for FR-1–FR-7 | No complete FR-1–FR-7 E2E currently | Build E2E per implemented feature and SK-1 |
 | TQ-4 negative | Invalid/unavailable IDs, missing metadata, quota, expired OAuth, API errors | Existing FR-1 and playlist negatives | Complete error matrix for each feature/provider |
 | TQ-5 CI isolation | Run mocks/fixtures without live API credentials | CI runs pytest with live tests skipped unless opted in | Keep live tests out of required CI path |
@@ -55,6 +55,9 @@ See [local-check](../../skills/local-check/SKILL.md),
 - Follow-up: GitHub CI passed on commit `23a4d59` (89 passed, 5 opt-in live
   tests skipped). Ruff, package build, repository-doc validation, and secret
   scanning also passed. The PR remains a draft pending maintainer review.
+
+- The follow-up main sync merged FR-7 and the FR-3 branch; GitHub CI passed on
+  merged branch `ba3e2bb`. The PR has no remaining merge conflicts.
 
 ## Final Tharun FR checks — 2026-11-28
 
