@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import json
 import pytest
-
 from google.auth.exceptions import GoogleAuthError
 from mcp.server.fastmcp.exceptions import ToolError
 

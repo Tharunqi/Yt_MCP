@@ -177,7 +177,8 @@ def recommend_personalized_videos(
                     "uploads_per_sampled_channel": _UPLOADS_PER_CHANNEL,
                 },
                 "notes": [
-                    "Recommendations use liked videos (up to 1,000), subscriptions, and only the playlist IDs supplied for this request.",
+                    "Recommendations use liked videos (up to 1,000), subscriptions, and only the "
+                    "playlist IDs supplied for this request.",
                     "The preference profile is calculated for this request and is not saved.",
                     "YouTube watch history and a global recommendation feed are not used.",
                 ],

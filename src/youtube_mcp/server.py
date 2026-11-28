@@ -185,14 +185,20 @@ def create_mcp_server(
             reservation.settle(QuotaEstimate(0, 0))
             return {
                 "status": "authorization_required",
-                "message": "Read-only YouTube access was not granted. No recommendations were fetched.",
+                "message": (
+                    "Read-only YouTube access was not granted. "
+                    "No recommendations were fetched."
+                ),
                 "results": [],
             }
         except FileNotFoundError:
             reservation.settle(QuotaEstimate(0, 0))
             return {
                 "status": "authorization_setup_required",
-                "message": "Local Google OAuth credentials are not configured. No recommendations were fetched.",
+                "message": (
+                    "Local Google OAuth credentials are not configured. "
+                    "No recommendations were fetched."
+                ),
                 "results": [],
             }
         except BaseException:
