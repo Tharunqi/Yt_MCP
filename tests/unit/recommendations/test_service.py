@@ -126,7 +126,11 @@ class FakeMetadata:
         record_api_call("standard")
         return [
             video("topic-video", title="Python data science guide", channel_id=channel.channel_id),
-            video(f"upload-{channel.channel_id}", title="Python tutorial", channel_id=channel.channel_id),
+            video(
+                f"upload-{channel.channel_id}",
+                title="Python tutorial",
+                channel_id=channel.channel_id,
+            ),
         ]
 
 
