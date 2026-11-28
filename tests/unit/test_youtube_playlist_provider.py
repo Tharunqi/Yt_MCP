@@ -1,6 +1,8 @@
 from typing import Any
 
 from youtube_mcp.providers.youtube import SearchVideo, YouTubeDataProvider
+from youtube_mcp.quota.preflight import QuotaEstimate
+from youtube_mcp.quota.usage import QuotaUsage, quota_usage_context
 
 
 class FakeRequest:
@@ -95,3 +97,18 @@ def test_provider_searches_checks_channel_and_sends_write_bodies() -> None:
         "kind": "youtube#video",
         "videoId": "video_00001",
     }
+
+
+def test_provider_counts_search_and_playlist_write_quota_costs() -> None:
+    client = FakeYouTube()
+    provider = YouTubeDataProvider(client)
+    usage = QuotaUsage()
+
+    with quota_usage_context(usage):
+        provider.search_videos("algebra", "en")
+        provider.get_videos(["video_00001"])
+        provider.get_my_channel_id()
+        playlist_id = provider.create_playlist("Math lessons", "private")
+        provider.add_video_to_playlist(playlist_id, "video_00001")
+
+    assert usage.estimate() == QuotaEstimate(default_bucket_units=102, search_query_calls=1)

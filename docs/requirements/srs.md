@@ -91,34 +91,42 @@ multi-signal ranking; FR-3.6 exclusion; FR-3.7 explanations.
 
 ### FR-4 — Engagement analysis (Medium; Tharun)
 
-Accept an analysis period and optional comparison period; retrieve relevant
+Accept an inclusive analysis period and optional comparison period; retrieve
 likes, subscriptions, selected playlist items, and video metadata; report top
-channels/categories, duration statistics/distribution, and available weekly or
-monthly trends based on subscription-created and playlist-item-added dates.
-Apply identical metrics to the comparison period and state sources and date
-ranges. Describe liked/saved content, not actual watch time. Playlist selection
-and timestamp semantics require verification.
+channels/categories, duration statistics/distribution, weekly trends, and the
+same metrics for the comparison period. Read at most 1,000 likes, 1,000
+subscriptions, 1,000 items per playlist, and five selected playlists, with a
+maximum of 20 pages per source. Filter likes by video publish date because
+YouTube does not provide like dates. Use the API calendar dates for subscription
+creation and playlist-item addition. Count a video once in video totals if it
+appears in more than one source; count each playlist item in playlist trends.
+Show sources, date ranges, limits, and missing data. Describe liked/saved
+content, not actual watch time.
 
-Detailed IDs: FR-4.1 period inputs; FR-4.2 source retrieval; FR-4.3 top-channel
-and category grouping; FR-4.4 duration statistics; FR-4.5 time trends; FR-4.6
-like-for-like comparison; FR-4.7 source/range explanations.
+Detailed IDs: FR-4.1 period inputs; FR-4.2 bounded source retrieval; FR-4.3
+top-channel and category grouping; FR-4.4 duration statistics; FR-4.5 weekly
+time trends; FR-4.6 like-for-like comparison; FR-4.7 source/range and limit
+explanations.
 
 ### FR-5 — Playlist generation and creation (High; Tharun)
 
 Parse topic, total duration, maximum video length, language, title, and
-visibility; search and fetch bounded candidates; remove unavailable, duplicate,
-or constraint-breaking items; use deterministic planning to stay within the
-duration budget; mark unknown duration/language. Preview title, item title,
-channel, duration, link, reason, total duration, and privacy setting. Obtain
-explicit confirmation before playlist creation or item insertion. Verify OAuth
-and channel availability before write; accurately report full or partial
-outcomes.
+visibility; search one relevance-ordered page of up to 50 candidates and fetch
+their metadata; remove unavailable, duplicate, or constraint-breaking items.
+Keep candidate order, allow an exact duration fit, and continue after items that
+do not fit. Skip unknown duration and, when requested, unknown or different
+language. Accept `private`, `unlisted`, or `public` visibility. Preview title,
+item title, channel, duration, link, reason, total duration, and privacy setting.
+Obtain explicit confirmation before playlist creation or item insertion. Verify
+OAuth and channel availability before write; accurately report full or partial
+outcomes. Reserve quota before each API workflow and account for 50 quota units
+for playlist creation and each inserted item.
 
 Detailed IDs: FR-5.1 request parsing; FR-5.2 candidate filtering; FR-5.3 planning;
 FR-5.4 unknown metadata; FR-5.5 preview; FR-5.6 explicit confirmation; FR-5.7
 authorization/channel checks; FR-5.8 missing-channel handling; FR-5.9 partial
-write reporting. Exact-fit behavior, tie-breaking, and supported visibility
-values remain TBD.
+write reporting. Exact-fit, candidate order, and visibility are settled as
+described above and in [[brain/tharun/projects/fr4-fr5-design]].
 
 ### FR-6 — Metadata-based video summary (Medium; Viraj)
 
@@ -139,6 +147,13 @@ expanding derived analytics.
 
 Detailed IDs: FR-7.1 retrieval; FR-7.2 total duration; FR-7.3 distribution;
 FR-7.4 channel/category counts; FR-7.5 item summaries; FR-7.6 descriptive label.
+The implementation provides one tool for a playlist ID and one for a video ID
+or supported video URL. Playlist reads are capped at 1,000 items across 20
+pages; repeated videos count as separate playlist items. Both tools return the
+available duration, duration distribution, channel/category counts, and item
+metadata. Missing metadata is marked and totals use known durations only.
+Results remain request-scoped and are not stored. A YouTube API policy review
+is still required before release or any storage/expansion of analytics.
 
 ### SK-1 — Video-to-playlist workflow (High)
 
@@ -209,8 +224,7 @@ and [testing records](../testing/).
 ## 6. Open decisions
 
 Production SQL topology; migrations/schema versioning; OAuth app/redirect/token
-encryption; FR-1/FR-2 ranking quality evaluation; FR-4 playlist
-scope/timestamp semantics; FR-5 no-exact-fit/tie-break/visibility; FR-6 eligible
-content source; FR-7 data retention; final MCP schemas/resources; skill host
-distribution; performance/availability targets; retention/deletion controls;
-and priority confirmation. These are tracked in the [development plan](../development-plan.md).
+encryption; FR-1/FR-2 ranking quality evaluation; FR-6 eligible content source;
+FR-7 data retention; final MCP schemas/resources; skill host distribution;
+performance/availability targets; retention/deletion controls; and priority
+confirmation. These are tracked in the [development plan](../development-plan.md).

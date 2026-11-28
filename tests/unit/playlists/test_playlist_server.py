@@ -7,6 +7,7 @@ from youtube_mcp.auth.youtube import (
 )
 from youtube_mcp.playlists.previews import PlaylistPreviewStore
 from youtube_mcp.providers.youtube import SearchVideo, VideoDetails
+from youtube_mcp.quota.preflight import QuotaEstimate
 
 
 class FakeResponse:
@@ -43,8 +44,30 @@ class FakeProvider:
         self.added.append(video_id)
 
 
+class FakeReservation:
+    def __init__(self):
+        self.actual = None
+
+    def settle(self, actual):
+        self.actual = actual
+
+
+class FakeQuotaGate:
+    def __init__(self):
+        self.estimates = []
+        self.reservations = []
+
+    def check_and_reserve(self, estimate):
+        self.estimates.append(estimate)
+        reservation = FakeReservation()
+        self.reservations.append(reservation)
+        return reservation
+
+
 def prepare(monkeypatch):
     store = PlaylistPreviewStore()
+    quota_gate = FakeQuotaGate()
+    monkeypatch.setattr(server, "_feature_quota_preflight", quota_gate)
     monkeypatch.setattr(server, "playlist_previews", store)
     providers = []
 
@@ -55,14 +78,16 @@ def prepare(monkeypatch):
 
     monkeypatch.setattr(server, "YouTubeDataProvider", provider_factory)
     preview = server.preview_playlist("math", 20, "Math lessons", "private")
-    return preview, providers
+    assert quota_gate.estimates == [QuotaEstimate(1, 1)]
+    assert quota_gate.reservations[0].actual == QuotaEstimate(0, 0)
+    return preview, providers, quota_gate
 
 
 def test_preview_does_not_request_write_access_or_create_playlist(monkeypatch):
     client = {"writes": 0}
     monkeypatch.setattr(server, "build_youtube_client", lambda **kwargs: client)
 
-    preview, providers = prepare(monkeypatch)
+    preview, providers, quota_gate = prepare(monkeypatch)
 
     assert preview["status"] == "preview"
     assert preview["items"][0]["title"] == "Lesson 1"
@@ -79,10 +104,11 @@ def test_playlist_is_created_only_after_confirmation(monkeypatch):
         "build_youtube_client",
         lambda scopes=None: scope_requests.append(scopes) or client,
     )
-    preview, providers = prepare(monkeypatch)
+    preview, providers, quota_gate = prepare(monkeypatch)
 
     pending = server.create_playlist_from_preview(preview["preview_id"], False)
     assert pending["status"] == "confirmation_required"
+    assert len(quota_gate.estimates) == 1
     assert scope_requests == [None]
     assert "playlist" not in client
 
@@ -98,12 +124,13 @@ def test_playlist_is_created_only_after_confirmation(monkeypatch):
     assert result["playlist_url"].endswith("playlist_01")
     assert result["added_video_ids"] == ["video_00001"]
     assert result["failed_items"] == []
+    assert quota_gate.estimates[-1] == QuotaEstimate(101, 0)
 
 
 def test_partial_playlist_failure_lists_items_that_were_not_added(monkeypatch):
     client = {}
     monkeypatch.setattr(server, "build_youtube_client", lambda scopes=None: client)
-    preview, providers = prepare(monkeypatch)
+    preview, providers, quota_gate = prepare(monkeypatch)
     monkeypatch.setattr(FakeProvider, "fail_video", "video_00001", raising=False)
 
     result = server.create_playlist_from_preview(preview["preview_id"], True)
@@ -124,6 +151,7 @@ def test_missing_youtube_channel_stops_before_playlist_creation(monkeypatch):
     monkeypatch.setattr(server, "playlist_previews", PlaylistPreviewStore())
     monkeypatch.setattr(server, "build_youtube_client", lambda scopes=None: {})
     monkeypatch.setattr(server, "YouTubeDataProvider", NoChannelProvider)
+    monkeypatch.setattr(server, "_feature_quota_preflight", FakeQuotaGate())
     preview = server.preview_playlist("math", 20, "Math lessons", "private")
 
     result = server.create_playlist_from_preview(preview["preview_id"], True)

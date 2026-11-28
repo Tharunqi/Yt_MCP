@@ -15,5 +15,5 @@ Source: SDLC and Workflow document provided by Tharun on 2026-11-26.
 ## Current project choices
 
 - Tharun works on FR-4, FR-5, and FR-7 only. See [[brain/tharun/Tharun]] and [[brain/tharun/projects/youtube-mcp]].
-- Prepare the SRS, design documents, ADRs, and traceability matrix at the end of the project.
+- Update the SRS and design notes as each assigned feature is reviewed. Tharun requested completing the FR-4/FR-5 design work before starting FR-7.
 - No GitHub issue or PR IDs have been linked yet. Add them when the team creates them.
