@@ -13,7 +13,11 @@ from youtube_mcp.analytics.playlist_analysis import (
     analyze_playlist as build_playlist_analysis,
 )
 from youtube_mcp.analytics.playlist_analysis import (
+    analyze_video as build_video_analysis,
+)
+from youtube_mcp.analytics.playlist_analysis import (
     validate_playlist_id,
+    validate_video_identifier,
 )
 from youtube_mcp.auth.youtube import (
     YOUTUBE_PLAYLIST_WRITE_SCOPE,
@@ -57,6 +61,7 @@ from youtube_mcp.quota.preflight import (
     estimate_playlist_analysis_quota,
     estimate_playlist_creation_quota,
     estimate_playlist_preview_quota,
+    estimate_video_analysis_quota,
 )
 from youtube_mcp.quota.usage import QuotaUsage, quota_usage_context
 from youtube_mcp.summarization.metadata_summary import (
@@ -236,9 +241,7 @@ def analyze_engagement(
 
     comparison_start = comparison_end = None
     if comparison_start_date is not None and comparison_end_date is not None:
-        comparison_start, comparison_end = parse_period(
-            comparison_start_date, comparison_end_date
-        )
+        comparison_start, comparison_end = parse_period(comparison_start_date, comparison_end_date)
 
     playlist_ids = validate_playlist_ids(selected_playlist_ids)
     provider = YouTubeDataProvider(build_youtube_client())
@@ -247,9 +250,7 @@ def analyze_engagement(
         estimate_engagement_quota(max_playlists=len(playlist_ids)),
         lambda: fetch_engagement_data(provider, playlist_ids),
     )
-    return analyze_engagement_data(
-        data, start, end, comparison_start, comparison_end
-    )
+    return analyze_engagement_data(data, start, end, comparison_start, comparison_end)
 
 
 @mcp.tool()
@@ -264,6 +265,22 @@ def analyze_playlist(playlist_id: str) -> dict[str, Any]:
     return _run_with_quota(
         _feature_quota_preflight,
         estimate_playlist_analysis_quota(),
+        analyze,
+    )
+
+
+@mcp.tool()
+def analyze_video(video_url_or_id: str) -> dict[str, Any]:
+    """Analyze one video using descriptive metadata only; do not save results."""
+    video_id = validate_video_identifier(video_url_or_id)
+
+    def analyze() -> dict[str, Any]:
+        provider = YouTubeDataProvider(build_youtube_client())
+        return build_video_analysis(video_id, provider)
+
+    return _run_with_quota(
+        _feature_quota_preflight,
+        estimate_video_analysis_quota(),
         analyze,
     )
 
@@ -302,9 +319,7 @@ def preview_playlist(
 
 
 @mcp.tool()
-def create_playlist_from_preview(
-    preview_id: str, confirmed_by_user: bool
-) -> dict[str, object]:
+def create_playlist_from_preview(preview_id: str, confirmed_by_user: bool) -> dict[str, object]:
     """Create a reviewed playlist only after the user confirms the preview."""
     if confirmed_by_user is not True:
         return {
@@ -355,9 +370,7 @@ def create_playlist_from_preview(
             return _channel_setup_result()
 
         try:
-            playlist_id = provider.create_playlist(
-                plan.request.title, plan.request.visibility
-            )
+            playlist_id = provider.create_playlist(plan.request.title, plan.request.visibility)
         except HttpError as error:
             if youtube_error_reason(error) == "youtubeSignupRequired":
                 return _channel_setup_result()
@@ -411,6 +424,7 @@ def create_playlist_from_preview(
         estimate_playlist_creation_quota(len(plan.items)),
         create_playlist,
     )
+
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")

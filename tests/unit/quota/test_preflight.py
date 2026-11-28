@@ -6,6 +6,7 @@ from youtube_mcp.quota.preflight import (
     estimate_playlist_analysis_quota,
     estimate_playlist_creation_quota,
     estimate_playlist_preview_quota,
+    estimate_video_analysis_quota,
 )
 
 
@@ -29,3 +30,7 @@ def test_playlist_creation_estimate_counts_each_write() -> None:
 
 def test_playlist_analysis_estimate_covers_bounded_reads() -> None:
     assert estimate_playlist_analysis_quota() == QuotaEstimate(41, 0)
+
+
+def test_video_analysis_estimate_covers_video_and_category_reads() -> None:
+    assert estimate_video_analysis_quota() == QuotaEstimate(2, 0)

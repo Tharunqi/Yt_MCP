@@ -56,7 +56,9 @@ def test_playlist_analysis_counts_playlist_items_and_reports_missing_metadata():
         {"channel_id": "c2", "channel_title": "Beta", "item_count": 1},
     ]
     assert result["category_counts"][0] == {
-        "category_id": "22", "category_name": "People & Blogs", "item_count": 2
+        "category_id": "22",
+        "category_name": "People & Blogs",
+        "item_count": 2,
     }
     assert result["items"][0]["title"] == "One"
     assert result["items"][-1]["metadata_available"] is False

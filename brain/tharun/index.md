@@ -22,3 +22,4 @@ This is the entry point for the project notes.
 - [brain-refine](../../skills/brain-refine/SKILL.md)
 - [brain-query](../../skills/brain-query/SKILL.md)
 - [[brain/tharun/projects/fr7-playlist-analysis]] — FR-7 implementation and checks.
+- [[brain/tharun/projects/ai-session-2026-11-28-final-review]] — final SRS/SDLC checks.

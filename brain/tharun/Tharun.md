@@ -4,7 +4,7 @@
 
 - **FR-4:** Engagement analysis — complete and live-checked.
 - **FR-5:** Playlist suggestions and creation — implemented, unit-checked, previewed live, and manually created after confirmation.
-- **FR-7:** Playlist and video analysis — implemented, unit-checked, and live-checked; policy review remains.
+- **FR-7:** Playlist and single-video analysis are implemented, unit-checked, and live-checked; policy review remains.
 
 I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] for project status and [[brain/tharun/log]] for run records.
 
@@ -17,7 +17,7 @@ I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] f
 - A video that appears in likes and playlists counts once in video totals. Playlist trend counts each playlist item.
 - FR-4 and FR-5 reserve quota before YouTube data calls and settle the actual usage.
 - Results show their date ranges, sources, missing dates, and missing metadata. They describe liked or saved content, not watch time. Results are not saved.
-- Unit checks and CI cover FR-4. A live read-only check returned one video for 2026-11-01 to 2026-11-26.
+- Unit checks and CI cover FR-4. The live read-only check passed; account result details are not kept here.
 
 ## FR-5 progress
 
@@ -27,16 +27,16 @@ I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] f
 - A video that exactly fills the remaining time is included. If several videos could fit, the first one in YouTube's relevance order is considered first.
 - Playlist visibility must be private, unlisted, or public. The preview shows the title, channel, length, link, reason, total time, privacy, and skipped items.
 - No playlist is created until the user confirms the one-time preview. The preview expires after 15 minutes. Write access is requested after confirmation, and the app checks for a YouTube channel first.
-- The result lists videos added and any that failed. Unit checks passed, the live preview worked, and the user later reported successful playlist creation after confirmation.
+- The result lists videos added and any that failed. Unit checks, live preview, and playlist creation after user confirmation passed.
 
 ## FR-7 progress
 
-- `analyze_playlist` checks one playlist ID, then reads up to 1,000 items across 20 pages.
+- `analyze_playlist` checks one playlist ID, then reads up to 1,000 items across 20 pages. `analyze_video` checks one video ID or supported URL.
 - The result includes known total duration, five duration ranges, channel/category counts, and each playlist item’s metadata and link.
 - Repeated videos count as separate playlist items. Missing videos and durations are shown; the duration total uses known values only.
 - The result says it is descriptive metadata, does not measure viewing behavior, and is not saved. Quota is reserved before client setup and YouTube reads.
-- Unit tests cover counts, missing metadata, repeated videos, empty playlists, ID checks, quota rejection, and result output.
-- A read-only live check passed through MCP. The YouTube API policy review is still needed before release or storage.
+- Unit tests cover playlist and video counts, missing metadata, repeated videos, empty playlists, ID checks, quota rejection, and result output.
+- Read-only playlist and single-video checks passed through MCP. The YouTube API policy review is still needed before release or storage.
 
 ## Second Brain
 
@@ -59,4 +59,4 @@ I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] f
 - Review this Brain update and submit it through a PR, as required by SB-5.
 - Ask each team member to author their own Brain note.
 - FR-4 and FR-5 live checks are recorded.
-- Tomorrow: finish the SRS/SDLC review of FR-4, FR-5, and FR-7. The YouTube API policy review remains open before release or storage.
+- Finish the SRS/SDLC review of FR-4, FR-5, and FR-7. The YouTube API policy review remains open before release or storage.

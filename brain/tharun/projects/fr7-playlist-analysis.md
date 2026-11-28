@@ -6,10 +6,10 @@ Requirements: FR-7.1–FR-7.6, NFR-QUOTA-01–03, NFR-PRIV-01
 
 ## What it does
 
-The `analyze_playlist` tool checks one playlist ID, reserves quota, and reads
-playlist items and video metadata through the current YouTube provider. It reads
-up to 1,000 items across 20 pages. It returns total known duration, duration
-ranges, channel/category counts, and an item summary with links.
+FR-7 has two read-only tools. `analyze_playlist` checks one playlist ID, reserves
+quota, and reads up to 1,000 playlist items across 20 pages. `analyze_video`
+checks one video ID or supported URL and reads that video's metadata. Both return
+known duration, duration ranges, channel/category counts, and item summaries.
 
 Each playlist position counts as an item, including repeated videos. Video
 metadata is requested once per unique video ID. Missing videos and durations are
@@ -22,20 +22,23 @@ API policy review is still needed before release or any later storage/expansion.
 
 ## Checks
 
-Focused tests: 13 passed. Full suite: 100 passed, 5 live checks skipped.
-Ruff, docs/Brain validation, and `git diff --check` passed. The local `python -m build` command was unavailable because `build` is missing
-from the host environment. The Docker image rebuilt and packaged the current
-code successfully. The live check initially found the old app image;
-rebuilding it exposed the tool, and the read-only MCP check then passed. The
-playlist result is not saved in project notes.
+Focused playlist/video/quota tests: 18 passed. Full suite: 105 passed, 5 opt-in
+live tests skipped. Ruff and docs/Brain validation passed. Live FR-4, FR-5 preview,
+and FR-7 playlist/video MCP checks passed. The owner confirmed an earlier FR-5
+confirmation created a playlist in their account. The final check did not
+create another playlist, and live account result data is not saved. `git diff
+--check` passed. The local `python -m build` command was unavailable because
+`build` is missing from the host environment. The Docker image rebuilt and
+packaged the current code successfully. The live check initially found the old
+app image; rebuilding it exposed the tool, and the read-only MCP check passed.
 
 ## Data flow
 
 ```mermaid
 flowchart LR
-    Host[MCP client] -->|playlist ID| Tool[analyze_playlist]
-    Tool --> Validate[Validate ID]
-    Validate --> Quota[Reserve worst-case quota]
+    Host[MCP client] -->|playlist ID or video ID/URL| Tool[FR-7 MCP tool]
+    Tool --> Validate[Validate input]
+    Validate --> Quota[Reserve quota]
     Quota --> Provider[YouTube data provider]
     Provider --> API[YouTube Data API]
     API --> Analysis[Count items and summarize metadata]
@@ -49,10 +52,13 @@ flowchart LR
 classDiagram
     class PlaylistAnalysisTool {
       +analyze_playlist(playlist_id)
+      +analyze_video(video_url_or_id)
     }
     class PlaylistAnalysis {
       +validate_playlist_id(id)
+      +validate_video_identifier(id)
       +analyze_playlist(id, provider)
+      +analyze_video(id, provider)
     }
     class YouTubeDataProvider {
       +list_playlist_items(id)
@@ -74,11 +80,11 @@ sequenceDiagram
     participant Provider as YouTube data provider
     participant API as YouTube Data API
     User->>Host: Request playlist analysis
-    Host->>Tool: playlist ID
-    Tool->>Tool: Validate ID
-    Tool->>Quota: Reserve 41 standard units
-    Tool->>Provider: Read bounded playlist
-    Provider->>API: Playlist items, video details, category names
+    Host->>Tool: Playlist ID or video ID/URL
+    Tool->>Tool: Validate input
+    Tool->>Quota: Reserve bounded quota
+    Tool->>Provider: Read playlist or one video
+    Provider->>API: Items/details and optional category names
     API-->>Provider: Metadata
     Provider-->>Tool: Playlist and video records
     Tool->>Tool: Count items and summarize known fields
@@ -93,6 +99,6 @@ feature. The project ER diagram remains the quota usage/reservation model in
 
 ## Next
 
-- Tomorrow: complete the final SRS/SDLC review of FR-4, FR-5, and FR-7.
+- Get the required teammate review on the FR-7 PR, then merge. The YouTube API policy review remains open before storage or release.
 - Keep analytics request-scoped until the team completes the API policy review.
-- Add an issue and PR link when the team creates them; neither ID is available yet.
+- Track this work in [Issue #9](https://github.com/Tharunqi/Yt_MCP/issues/9). Add the PR link after it is opened.

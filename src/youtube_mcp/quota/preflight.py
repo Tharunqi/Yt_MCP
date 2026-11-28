@@ -70,6 +70,11 @@ def estimate_similar_video_quota(*, max_queries: int = 3) -> QuotaEstimate:
     )
 
 
+def estimate_video_analysis_quota() -> QuotaEstimate:
+    """Reserve one video-details request and one optional category lookup."""
+    return QuotaEstimate(default_bucket_units=2, search_query_calls=0)
+
+
 def estimate_engagement_quota(*, max_playlists: int = 5) -> QuotaEstimate:
     """Reserve a bounded FR-4 read of account and selected playlist data.
 

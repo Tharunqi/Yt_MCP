@@ -28,3 +28,12 @@ test.
 Re-run applicable skill scenarios on the candidate branch, attach test output or
 manual evidence, record result and evaluator, and link the PR. No historical
 results or PR IDs are fabricated here.
+
+
+## 2026-11-28 Tharun final checks
+
+| Skill | Scenario and evidence | Result | Remaining |
+|---|---|---|---|
+| `local-check` | Rebuilt the current Docker image, started the local stack, ran 105 automated tests, Ruff and the docs validator, then invoked FR-4, FR-5 preview, and FR-7 playlist/video tools through MCP. | Pass for these assigned-feature checks. | Full SK-1 product workflow, PR CI for the new changes, and team review remain. |
+| `brain-query` | Traced FR-7.1–FR-7.6 from the SRS to analytics code, quota estimate, unit tests, and Tharun's FR-7 note. | Pass for this bounded requirement query. | A complete project-wide requirement query remains part of Stage 4. |
+| `video-to-playlist` | FR-5 preview and confirmation refusal were live-checked; earlier confirmed creation is owner-reported. | Partial; not a full SK-1 run. | Run the complete FR-6 → FR-1 → FR-5 → confirmation → FR-7 sequence with team approval. |
