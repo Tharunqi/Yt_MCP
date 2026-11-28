@@ -139,7 +139,7 @@ def test_recommendation_tool_is_registered_and_returns_explained_results(monkeyp
     assert payload["results"][0]["reasons"]
     assert structured["results"][0]["video_id"] == "candidate-video"
     assert quota.estimates == [QuotaEstimate(44, 1)]
-    assert quota.reservation.settlements == [QuotaEstimate(6, 1)]
+    assert quota.reservation.settlements == [QuotaEstimate(5, 1)]
 
 
 def test_recommendation_tool_reports_missing_authorization_without_fetching(monkeypatch) -> None:
