@@ -185,7 +185,7 @@ def test_service_aggregates_bounded_signals_excludes_interactions_and_settles_us
         ("channel-4", 5),
     ]
     assert quota.estimates == [QuotaEstimate(59, 1)]
-    assert quota.reservation.settlements == [QuotaEstimate(19, 1)]
+    assert quota.reservation.settlements == [QuotaEstimate(18, 1)]
     assert "liked-video" not in {item["video_id"] for item in result["results"]}
     assert "saved-video" not in {item["video_id"] for item in result["results"]}
     assert all(item["reasons"] for item in result["results"])

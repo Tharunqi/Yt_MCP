@@ -114,7 +114,7 @@ def test_recommendation_tool_is_registered_and_returns_explained_results(monkeyp
     monkeypatch.setattr(
         server_module,
         "YouTubeProvider",
-        lambda *, client: FakeMetadataProvider(),
+        lambda client=None: FakeMetadataProvider(),
     )
     server = server_module.create_mcp_server(quota_preflight=quota)
 
