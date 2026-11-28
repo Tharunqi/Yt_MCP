@@ -40,3 +40,14 @@
 - **Could not verify yet:** Orchestration/MCP tests have not been added or run. Quota edge cases and provider/API error behavior need focused checks before the PR.
 - **Next:** Add focused tests and execute build, Ruff, docs validation, and pytest when the supported Python environment is available.
 - Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs#FR-3]], [[docs/api/mcp-tools]], [[docs/traceability]].
+
+## 2026-11-28 - FR-3 workflow verification and draft review
+
+- Added unit coverage for request orchestration, bounded account reads, selected-playlist inputs, exclusions, quota settlement, invalid requests, and provider failures.
+- Added MCP integration coverage for tool registration, successful explained recommendations, authorization denial, and quota rejection before OAuth.
+- Review found that unavailable subscription channels could allow more than five channel lookups; capped lookup attempts at five to match the quota estimate and added a regression assertion.
+- Updated test-plan, development-plan, and traceability evidence. Opened draft PR [#11](https://github.com/Tharunqi/Yt_MCP/pull/11).
+- **Worked:** The service now limits lookup attempts consistently with reserved quota, and deterministic tests cover the main success and failure paths.
+- **Could not verify locally:** No Python interpreter is installed in this environment, so pytest, Ruff, package build, and repository-doc validation could not run. `git diff --check` passed; GitHub CI must execute the suite.
+- **Next:** Review CI results and fix any failures before marking PR #11 ready for review.
+- Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs#FR-3]], [[docs/testing/test-plan]], [[docs/traceability]].

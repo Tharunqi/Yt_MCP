@@ -127,9 +127,11 @@ def recommend_personalized_videos(
             candidate_ids = {video.video_id for video in candidates if video.video_id}
             sampled_channels: list[str] = []
             if include_subscription_uploads:
+                channel_attempts = 0
                 for channel_id in dict.fromkeys(subscribed_ids):
-                    if len(sampled_channels) >= _MAX_UPLOAD_CHANNELS:
+                    if channel_attempts >= _MAX_UPLOAD_CHANNELS:
                         break
+                    channel_attempts += 1
                     try:
                         channel = metadata_provider.get_channel(channel_id)
                     except ResourceNotFoundError:
