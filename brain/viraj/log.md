@@ -30,3 +30,45 @@
 - **Stage review:** The pure ranking layer is isolated and deterministic. Account retrieval and the MCP tool remain incomplete; local test execution was unavailable. Next session should wire those layers through the existing OAuth/provider and quota boundaries.
 - **Next:** Integrate account data and bounded candidate acquisition with the OAuth and quota patterns; wire the MCP tool and update shared docs.
 - Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs]], [[docs/traceability]].
+
+## 2026-11-28 - FR-3 request workflow integration
+
+- Started from updated `main` at merge commit `b4912ce` on branch `feature/viraj-fr3-integration`.
+- Added a request-time recommendation service and registered the `recommend_videos` MCP tool. It reads bounded likes, subscriptions, and explicitly selected playlists; optionally samples subscribed-channel uploads; fetches metadata; ranks and explains candidates; and excludes liked/saved video IDs.
+- Added fail-closed quota reservation estimates and request-scoped API-call accounting, then updated shared FR-3 documentation and traceability.
+- **Worked:** Existing OAuth/provider abstractions supported the integration without persisting inferred profiles or requesting playlist-write access.
+- **Could not verify yet:** Orchestration/MCP tests have not been added or run. Quota edge cases and provider/API error behavior need focused checks before the PR.
+- **Next:** Add focused tests and execute build, Ruff, docs validation, and pytest when the supported Python environment is available.
+- Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs#FR-3]], [[docs/api/mcp-tools]], [[docs/traceability]].
+
+## 2026-11-28 - FR-3 workflow verification and draft review
+
+- Added unit coverage for request orchestration, bounded account reads, selected-playlist inputs, exclusions, quota settlement, invalid requests, and provider failures.
+- Added MCP integration coverage for tool registration, successful explained recommendations, authorization denial, and quota rejection before OAuth.
+- Review found that unavailable subscription channels could allow more than five channel lookups; capped lookup attempts at five to match the quota estimate and added a regression assertion.
+- Updated test-plan, development-plan, and traceability evidence. Opened draft PR [#11](https://github.com/Tharunqi/Yt_MCP/pull/11).
+- **Worked:** The service now limits lookup attempts consistently with reserved quota, and deterministic tests cover the main success and failure paths.
+- **Could not verify locally:** No Python interpreter is installed in this environment, so pytest, Ruff, package build, and repository-doc validation could not run. `git diff --check` passed; GitHub CI must execute the suite.
+- **Next:** Review CI results and fix any failures before marking PR #11 ready for review.
+- Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs#FR-3]], [[docs/testing/test-plan]], [[docs/traceability]].
+
+## 2026-11-28 - FR-3 sync with current main
+
+- Fetched `origin/main` at `1333088` and merged the team's FR-7 delivery into `feature/viraj-fr3-integration` to address the conflicts GitHub reported on PR #11.
+- Preserved the FR-3 recommendation flow while reconciling shared provider quota accounting, MCP registration, architecture, test-plan, development-plan, API, and traceability documents with the FR-7 changes.
+- **Worked:** The merge keeps FR-3, FR-6, and the newly merged FR-7 tools represented together, including quota-aware provider calls.
+- **Could not verify locally:** Python is unavailable in this environment, so checks were run by GitHub CI.
+- **Next:** Get maintainer review on PR [#11](https://github.com/Tharunqi/Yt_MCP/pull/11) and complete the team's product E2E before release.
+- Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs#FR-3]], [[docs/testing/test-plan]], [[docs/traceability]].
+
+- **Verification follow-up:** GitHub CI passed on merged branch `ba3e2bb`; PR #11 now has two successful checks and no conflict with `main`. The PR remains a draft for maintainer review.
+- **Stage review:** The code and docs are now integrated with the latest main and green in CI. Local execution remains unavailable; maintainer review and the team's product E2E remain open.
+
+## 2026-11-28 - FR-3 Session 3 stage review
+
+- Fixed the integration test's provider factory to support the server's default construction path and corrected quota assertions against the measured bounded request path.
+- GitHub CI passed on commit `23a4d59`: 89 tests passed and 5 opt-in live tests were skipped; Ruff, build, documentation validation, and secret scanning passed.
+- **Worked:** The full deterministic workflow is green, including quota accounting and MCP tool integration.
+- **Could not verify:** Live YouTube calls remain opt-in; the PR still needs maintainer review and merge.
+- **Next:** Have the maintainer review PR [#11](https://github.com/Tharunqi/Yt_MCP/pull/11); address review feedback before it is merged.
+- Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs#FR-3]], [[docs/testing/test-plan]], [[docs/traceability]].

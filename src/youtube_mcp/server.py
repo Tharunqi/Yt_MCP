@@ -58,12 +58,17 @@ from youtube_mcp.quota.preflight import (
     QuotaPreflight,
     UnavailableQuotaPreflight,
     estimate_engagement_quota,
+    estimate_personalized_recommendation_quota,
     estimate_playlist_analysis_quota,
     estimate_playlist_creation_quota,
     estimate_playlist_preview_quota,
     estimate_video_analysis_quota,
 )
 from youtube_mcp.quota.usage import QuotaUsage, quota_usage_context
+from youtube_mcp.recommendations.service import (
+    recommend_personalized_videos,
+    validate_recommendation_request,
+)
 from youtube_mcp.summarization.metadata_summary import (
     summarize_video_metadata as build_metadata_summary,
 )
@@ -180,6 +185,69 @@ def create_mcp_server(
             video_url_or_id,
             video_provider,
             quota_preflight=quota_gate,
+        )
+
+    @server.tool()
+    def recommend_videos(
+        topic: str,
+        selected_playlist_ids: list[str] | None = None,
+        include_subscription_uploads: bool = True,
+        max_results: int = 10,
+    ) -> dict[str, object]:
+        """Recommend public videos using current, read-only account signals.
+
+        Provide up to three playlist IDs the user selected for this request.
+        The preference profile is ephemeral; YouTube watch history is not used.
+        """
+        topic, selected_playlist_ids = validate_recommendation_request(
+            topic,
+            selected_playlist_ids,
+            include_subscription_uploads=include_subscription_uploads,
+            max_results=max_results,
+        )
+        reservation = quota_gate.check_and_reserve(
+            estimate_personalized_recommendation_quota(
+                playlist_count=len(selected_playlist_ids or []),
+                include_subscription_uploads=include_subscription_uploads,
+            )
+        )
+        try:
+            client = build_youtube_client(scopes=[YOUTUBE_READ_ONLY_SCOPE])
+        except (GoogleAuthError, OAuth2Error, PermissionError):
+            reservation.settle(QuotaEstimate(0, 0))
+            return {
+                "status": "authorization_required",
+                "message": (
+                    "Read-only YouTube access was not granted. "
+                    "No recommendations were fetched."
+                ),
+                "results": [],
+            }
+        except FileNotFoundError:
+            reservation.settle(QuotaEstimate(0, 0))
+            return {
+                "status": "authorization_setup_required",
+                "message": (
+                    "Local Google OAuth credentials are not configured. "
+                    "No recommendations were fetched."
+                ),
+                "results": [],
+            }
+        except BaseException:
+            reservation.settle(QuotaEstimate(0, 0))
+            raise
+
+        account_provider = YouTubeDataProvider(client)
+        metadata_provider = YouTubeProvider(client=client)
+        return recommend_personalized_videos(
+            topic,
+            selected_playlist_ids,
+            account_provider,
+            metadata_provider,
+            quota_preflight=quota_gate,
+            include_subscription_uploads=include_subscription_uploads,
+            max_results=max_results,
+            quota_reservation=reservation,
         )
 
     @server.tool()

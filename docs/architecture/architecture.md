@@ -35,10 +35,11 @@ operation that needs them.
 | Public video and channel discovery | `src/youtube_mcp/discovery/similar_videos.py`, `src/youtube_mcp/discovery/similar_channels.py` | FR-1 and FR-2 implemented with bounded candidate pools |
 | Engagement calculations | `src/youtube_mcp/engagement/` | FR-4 present |
 | Playlist planning/preview/write | `src/youtube_mcp/playlists/` | FR-5 present |
-| Playlist analysis | `src/youtube_mcp/analytics/playlist_analysis.py` | FR-7 present; bounded and request-scoped |
 | OAuth helpers | `src/youtube_mcp/auth/` | Used for private data and writes |
-| Quota reservations | `src/youtube_mcp/quota/` | SQLAlchemy ledger; preflight for FR-1/2/4/5/6/7; bounded reads; playlist writes cost 50 units each |
-| Recommendations and metadata summary | `recommendations/`, `summarization/` | FR-3 incomplete; FR-6 present |
+| Quota reservations | `src/youtube_mcp/quota/` | SQLAlchemy ledger; preflight for FR-1/2/3/4/5/6/7; bounded reads; playlist writes cost 50 units each |
+| Personalized recommendations | `src/youtube_mcp/recommendations/`, `auth/`, `providers/`, `quota/` | FR-3 ranking and request-time MCP workflow implemented with unit/integration coverage; PR #11 review remains |
+| Metadata summary | `src/youtube_mcp/summarization/` | FR-6 metadata-only MCP tool implemented |
+| Playlist analysis | `src/youtube_mcp/analytics/playlist_analysis.py` | FR-7 present; bounded and request-scoped |
 
 ## Video-to-playlist sequence
 

@@ -126,3 +126,30 @@ def estimate_similar_channels_quota(
         default_bucket_units=3 + max_queries + 2 * candidate_limit,
         search_query_calls=max_queries,
     )
+
+
+def estimate_personalized_recommendation_quota(
+    *, playlist_count: int, include_subscription_uploads: bool = True
+) -> QuotaEstimate:
+    """Reserve a worst-case FR-3 request across account, metadata and search calls.
+
+    The request caps liked videos at 1,000, selected playlists at three with 50
+    items each, subscriptions at 50, candidate search at 25 videos, and upload
+    sampling at five subscriptions with five uploads each.
+    """
+    if not 0 <= playlist_count <= 3:
+        raise ValueError("playlist_count must be between 0 and 3")
+
+    # Twenty liked pages, one subscriptions page, selected playlist pages,
+    # metadata batches for the maximum liked and saved IDs, and one standard
+    # call to fetch topic-search candidate details. Search itself is separate.
+    interaction_batches = 20 + playlist_count
+    standard_calls = 20 + 1 + playlist_count + interaction_batches + 1
+    if include_subscription_uploads:
+        # Each sampled channel can require a channel lookup, uploads page,
+        # and video metadata batch.
+        standard_calls += 5 * 3
+    return QuotaEstimate(
+        default_bucket_units=standard_calls,
+        search_query_calls=1,
+    )

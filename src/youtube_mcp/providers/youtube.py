@@ -105,6 +105,11 @@ class YouTubeProvider:
         ids = [item.get("id", {}).get("videoId") for item in response.get("items", [])]
         return self._videos_by_ids([video_id for video_id in ids if video_id])
 
+    def get_videos(self, video_ids: list[str]) -> list[VideoMetadata]:
+        """Fetch full public metadata for a bounded list of video IDs."""
+        unique_ids = list(dict.fromkeys(video_id for video_id in video_ids if video_id))
+        return self._videos_by_ids(unique_ids)
+
     def get_channel(self, identifier: str) -> ChannelMetadata:
         kind, parsed_value = parse_channel_identifier(identifier)
         kwargs = {"part": "snippet,contentDetails"}
@@ -342,15 +347,22 @@ class YouTubeDataProvider:
                         return video_ids
         return video_ids
 
-    def list_subscriptions(self) -> list[SubscriptionDetails]:
+    def list_subscriptions(
+        self, *, max_results: int | None = None
+    ) -> list[SubscriptionDetails]:
         subscriptions: list[SubscriptionDetails] = []
+        page_limit = None
+        if max_results is not None:
+            if not 1 <= max_results <= 100:
+                raise ValueError("max_results must be between 1 and 100")
+            page_limit = (max_results + _PAGE_SIZE - 1) // _PAGE_SIZE
         for response in _pages(
             self._client.subscriptions(),
             max_items=_MAX_SUBSCRIPTIONS,
-            max_pages=_MAX_SOURCE_PAGES,
             part="snippet",
             mine=True,
             maxResults=_PAGE_SIZE,
+            max_pages=min(page_limit or _MAX_SOURCE_PAGES, _MAX_SOURCE_PAGES),
         ):
             for item in response.get("items", []):
                 snippet = item.get("snippet", {})
@@ -362,17 +374,26 @@ class YouTubeDataProvider:
                         created_at=_api_date(snippet.get("publishedAt")),
                     )
                 )
+                if max_results is not None and len(subscriptions) >= max_results:
+                    return subscriptions
         return subscriptions
 
-    def list_playlist_items(self, playlist_id: str) -> list[PlaylistItemDetails]:
+    def list_playlist_items(
+        self, playlist_id: str, *, max_results: int | None = None
+    ) -> list[PlaylistItemDetails]:
         playlist_items: list[PlaylistItemDetails] = []
+        page_limit = None
+        if max_results is not None:
+            if not 1 <= max_results <= 500:
+                raise ValueError("max_results must be between 1 and 500")
+            page_limit = (max_results + _PAGE_SIZE - 1) // _PAGE_SIZE
         for response in _pages(
             self._client.playlistItems(),
             max_items=_MAX_PLAYLIST_ITEMS,
-            max_pages=_MAX_SOURCE_PAGES,
             part="snippet,contentDetails",
             playlistId=playlist_id,
             maxResults=_PAGE_SIZE,
+            max_pages=min(page_limit or _MAX_SOURCE_PAGES, _MAX_SOURCE_PAGES),
         ):
             for item in response.get("items", []):
                 snippet = item.get("snippet", {})
@@ -387,6 +408,8 @@ class YouTubeDataProvider:
                             added_at=_api_date(snippet.get("publishedAt")),
                         )
                     )
+                    if max_results is not None and len(playlist_items) >= max_results:
+                        return playlist_items
         return playlist_items
 
     def search_videos(
