@@ -49,3 +49,13 @@ Requirements: FR-3, FR-6.
 Related notes: [[brain/tharun/resources/second-brain-workflow]], [[docs/requirements/srs]], [[docs/traceability]].
 
 PR: [#8](https://github.com/Tharunqi/Yt_MCP/pull/8). No GitHub issue ID has been created.
+
+## Session 3 continued: FR-3 request workflow
+
+- Added `recommend_videos` with read-only OAuth, optional user-selected playlist IDs, request-time profile construction, bounded topic search, optional samples from subscribed-channel uploads, liked/saved exclusions, ranking, and explanation output.
+- Added request caps of 1,000 likes, 50 subscriptions, three selected playlists with 50 items each, 25 topic search candidates, and five sampled subscription channels with five uploads each. Added quota preflight estimates before OAuth/API work and request-scoped accounting for account-provider reads.
+- Updated the tool reference, architecture, development plan, README, and FR-3 traceability. PR [#8](https://github.com/Tharunqi/Yt_MCP/pull/8) contains the earlier ranking and FR-6 work; this Session 3 branch still needs its own PR.
+- **Worked:** The workflow uses the existing provider and OAuth boundaries; inferred profile data is held only for the request and is not returned or stored.
+- **Still to verify:** Orchestration/MCP coverage, quota bounds, authorization, empty data, exclusions, and account API failures need focused checks before FR-3 is complete.
+- **Next:** Add focused provider/service/MCP coverage, run the project's checks, and resolve any failures before opening a PR.
+- Related notes: [[docs/requirements/srs]], [[docs/api/mcp-tools]], [[docs/traceability]].

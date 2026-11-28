@@ -30,3 +30,13 @@
 - **Stage review:** The pure ranking layer is isolated and deterministic. Account retrieval and the MCP tool remain incomplete; local test execution was unavailable. Next session should wire those layers through the existing OAuth/provider and quota boundaries.
 - **Next:** Integrate account data and bounded candidate acquisition with the OAuth and quota patterns; wire the MCP tool and update shared docs.
 - Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs]], [[docs/traceability]].
+
+## 2026-11-28 - FR-3 request workflow integration
+
+- Started from updated `main` at merge commit `b4912ce` on branch `feature/viraj-fr3-integration`.
+- Added a request-time recommendation service and registered the `recommend_videos` MCP tool. It reads bounded likes, subscriptions, and explicitly selected playlists; optionally samples subscribed-channel uploads; fetches metadata; ranks and explains candidates; and excludes liked/saved video IDs.
+- Added fail-closed quota reservation estimates and request-scoped API-call accounting, then updated shared FR-3 documentation and traceability.
+- **Worked:** Existing OAuth/provider abstractions supported the integration without persisting inferred profiles or requesting playlist-write access.
+- **Could not verify yet:** Orchestration/MCP tests have not been added or run. Quota edge cases and provider/API error behavior need focused checks before the PR.
+- **Next:** Add focused tests and execute build, Ruff, docs validation, and pytest when the supported Python environment is available.
+- Related notes: [[brain/viraj/projects/fr3-fr6-prep]], [[docs/requirements/srs#FR-3]], [[docs/api/mcp-tools]], [[docs/traceability]].

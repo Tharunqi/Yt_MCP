@@ -21,7 +21,7 @@ follows [[brain/Team]].
 |---|---|---|---|---|
 | Complete FR-1 current-branch review and regression | Sid | FR-1, TQ-1/2/4/6 | Unit/integration/negative checks and quota preflight evidence | Not created |
 | Implement FR-2 bounded channel discovery | Sid | FR-2.1–2.5 | Implemented: 5-upload samples, up to 3 queries, 10 candidates; unit/MCP tests pass | Not created |
-| Implement FR-3 request-time recommendations | Viraj | FR-3.1–3.7 | OAuth scope, source aggregation, exclusions, explanations; tests | Not created |
+| Implement FR-3 request-time recommendations | Viraj | FR-3.1–3.7 | Ranking core and bounded read-only MCP workflow implemented; orchestration tests, local verification, and review remain | Not created |
 | Complete FR-4 acceptance and timestamp verification | Tharun | FR-4.1–4.7 | Source/range and comparison behavior verified with tests | Not created |
 | Complete FR-5 edge cases and write safety | Tharun | FR-5.1–5.9 | Explicit confirmation, channel/auth errors, partial insertion regression | Not created |
 | Implement FR-6 metadata-only summary | Viraj | FR-6.1–6.3 | Metadata output labels; tests prohibit spoken-content claims | Not created |

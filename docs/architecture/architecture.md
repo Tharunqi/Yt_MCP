@@ -37,7 +37,9 @@ operation that needs them.
 | Playlist planning/preview/write | `src/youtube_mcp/playlists/` | FR-5 present |
 | OAuth helpers | `src/youtube_mcp/auth/` | Used for private data and writes |
 | Quota reservations | `src/youtube_mcp/quota/` | SQLAlchemy ledger and preflight |
-| Recommendations, metadata summary, playlist analytics | `recommendations/`, `summarization/`, `analytics/` | FR-3/6/7 implementation incomplete |
+| Personalized recommendations | `src/youtube_mcp/recommendations/`, `auth/`, `providers/`, `quota/` | FR-3 ranking and request-time MCP workflow implemented; automated integration coverage and team review remain |
+| Metadata summary | `src/youtube_mcp/summarization/` | FR-6 metadata-only MCP tool implemented |
+| Playlist analytics | `src/youtube_mcp/analytics/` | FR-7 implementation incomplete |
 
 ## Video-to-playlist sequence
 
