@@ -164,6 +164,7 @@ def test_service_aggregates_bounded_signals_excludes_interactions_and_settles_us
         "upload-channel-0",
         "upload-channel-1",
         "upload-channel-3",
+        "upload-channel-4",
     }
     assert account.liked_calls == 1
     assert account.subscription_limits == [50]

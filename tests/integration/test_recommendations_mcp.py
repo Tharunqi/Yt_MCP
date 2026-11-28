@@ -111,7 +111,11 @@ def test_recommendation_tool_is_registered_and_returns_explained_results(monkeyp
     quota = FakeQuota()
     monkeypatch.setattr(server_module, "build_youtube_client", lambda *, scopes: "client")
     monkeypatch.setattr(server_module, "YouTubeDataProvider", lambda client: FakeAccountProvider())
-    monkeypatch.setattr(server_module, "YouTubeProvider", lambda client: FakeMetadataProvider())
+    monkeypatch.setattr(
+        server_module,
+        "YouTubeProvider",
+        lambda *, client: FakeMetadataProvider(),
+    )
     server = server_module.create_mcp_server(quota_preflight=quota)
 
     tools = asyncio.run(server.list_tools())
