@@ -13,7 +13,7 @@
 - Goal: compare FR-4, FR-5, and FR-7 with the SRS and SDLC workflow and prepare the work for a reviewed PR.
 - Checks: full suite 105 passed, 5 opt-in live tests skipped; Ruff and repository docs/Brain checks passed. Live FR-4, FR-5 preview/refusal, and FR-7 playlist/video checks passed. The owner confirmed an earlier FR-5 confirmation created a playlist in their account. No new playlist was created in this check.
 - Changed: FR-7 gained standalone video analysis to match the SRS. Updated requirement traceability and final review notes. Issue: [#9](https://github.com/Tharunqi/Yt_MCP/issues/9).
-- Next: run CI on the PR and get one teammate review before merge. Keep derived analytics request-scoped until YouTube API policy review is complete.
+- Opened [PR #10](https://github.com/Tharunqi/Yt_MCP/pull/10) for review. CI and one teammate review are required before merge. Keep derived analytics request-scoped until YouTube API policy review is complete.
 
 Significant work runs and reviews are recorded here. Keep notes short and never include secrets.
 

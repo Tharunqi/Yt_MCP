@@ -99,6 +99,6 @@ feature. The project ER diagram remains the quota usage/reservation model in
 
 ## Next
 
-- Get the required teammate review on the FR-7 PR, then merge. The YouTube API policy review remains open before storage or release.
+- Get the required teammate review on [PR #10](https://github.com/Tharunqi/Yt_MCP/pull/10), then merge. The YouTube API policy review remains open before storage or release.
 - Keep analytics request-scoped until the team completes the API policy review.
-- Track this work in [Issue #9](https://github.com/Tharunqi/Yt_MCP/issues/9). Add the PR link after it is opened.
+- Track this work in [Issue #9](https://github.com/Tharunqi/Yt_MCP/issues/9) and [PR #10](https://github.com/Tharunqi/Yt_MCP/pull/10).

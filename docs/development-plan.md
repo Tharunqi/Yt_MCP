@@ -25,7 +25,7 @@ follows [[brain/Team]].
 | Complete FR-4 acceptance and timestamp verification | Tharun | FR-4.1–4.7, NFR-QUOTA-01–03 | Date rules, source limits, comparison, and quota preflight have unit coverage; PostgreSQL concurrency remains open | Not created |
 | Complete FR-5 edge cases and write safety | Tharun | FR-5.1–5.9, NFR-QUOTA-01–03 | Exact fit, candidate order, visibility, confirmation, partial writes, and quota accounting have unit coverage; live creation confirmed by owner | Not created |
 | Implement FR-6 metadata-only summary | Viraj | FR-6.1–6.3 | Metadata output labels; tests prohibit spoken-content claims | Not created |
-| Implement FR-7 playlist/video analysis | Tharun | FR-7.1–7.6 | `analyze_playlist` and `analyze_video` implemented; unit/quota checks and live FR-4, FR-5 preview, FR-7 playlist/video checks passed; policy review remains | [Issue #9](https://github.com/Tharunqi/Yt_MCP/issues/9) |
+| Implement FR-7 playlist/video analysis | Tharun | FR-7.1–7.6 | `analyze_playlist` and `analyze_video` implemented; unit/quota checks and live FR-4, FR-5 preview, FR-7 playlist/video checks passed; policy review remains | [Issue #9](https://github.com/Tharunqi/Yt_MCP/issues/9); [PR #10](https://github.com/Tharunqi/Yt_MCP/pull/10) |
 | Build SK-1 video-to-playlist workflow | Team/skill owner TBD | SK-1.1–1.6 | MCP E2E covers summary through confirmed creation and final analysis | Not created |
 | Verify PostgreSQL quota concurrency and decide migrations | Sid/DB owner TBD | NFR-QUOTA-03, TBD-1/2 | Concurrent integration evidence; migration decision | Not created |
 | Security and policy review | Team | NFR-SEC-01–04, NFR-PRIV-01, SEC-T | Scope/storage/log/retention review recorded | Not created |

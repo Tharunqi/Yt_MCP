@@ -42,7 +42,7 @@ I will work only on these three FRs. See [[brain/tharun/projects/youtube-mcp]] f
 
 - Start from [[brain/tharun/index]] and use the [[second-brain-workflow]] note.
 - Use the [brain-ingest](../../skills/brain-ingest/SKILL.md), [brain-refine](../../skills/brain-refine/SKILL.md), and [brain-query](../../skills/brain-query/SKILL.md) skills.
-- Keep Brain changes for a pull request. This update is still local and uncommitted.
+- Keep Brain changes in the pull request. Current review: [PR #10](https://github.com/Tharunqi/Yt_MCP/pull/10).
 - Sid and Viraj should write their own notes; I will not write notes for them.
 
 ## Decisions

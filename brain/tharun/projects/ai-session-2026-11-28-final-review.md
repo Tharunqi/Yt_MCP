@@ -30,6 +30,6 @@ local and live checks, and prepare the work for a reviewed pull request.
 
 ## Next
 
-- FR-7 work is tracked in [Issue #9](https://github.com/Tharunqi/Yt_MCP/issues/9). Add the PR link to [[fr7-playlist-analysis]] after opening it.
+- FR-7 work is tracked in [Issue #9](https://github.com/Tharunqi/Yt_MCP/issues/9) and review [PR #10](https://github.com/Tharunqi/Yt_MCP/pull/10).
 - Merge only after at least one other team member reviews the PR and PR CI passes.
 - Keep derived analytics request-scoped until the policy review is complete.

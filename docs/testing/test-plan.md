@@ -50,3 +50,4 @@ See [local-check](../../skills/local-check/SKILL.md),
 - FR-5: live constrained preview returned a private preview. A no-confirmation create request returned `confirmation_required` and made no changes. The user confirmed that a prior preview was explicitly approved and the playlist was created in their account.
 - FR-7: live playlist and single-video analyses returned metadata through MCP. Derived results were not saved.
 - The standalone local `python -m build` command is unavailable because `build` is not installed on the host. The Docker image built and packaged the current code. The existing CI workflow runs the full package build on PRs.
+- PR #10 is open. Its GitHub Actions checks and the required teammate review are pending.

@@ -16,7 +16,7 @@
 - FR-4 trends use the available subscription-created and selected-playlist-item-added dates. Like dates are unavailable, so the video publish date is the filter.
 - The FR-4 and FR-5 design, accepted rules, and quota checks are in [[fr4-fr5-design]].
 - Keep this note linked to [[second-brain-workflow]] and [[brain/tharun/log]]. Requirement IDs: FR-4, FR-5, FR-7.
-- FR-7 GitHub issue: [#9](https://github.com/Tharunqi/Yt_MCP/issues/9). Add the PR link after opening it.
+- FR-7 GitHub issue: [#9](https://github.com/Tharunqi/Yt_MCP/issues/9); review PR: [#10](https://github.com/Tharunqi/Yt_MCP/pull/10).
 
 ## Review checkpoint — 2026-11-26
 
